@@ -557,13 +557,14 @@ static class SpellList
                 {
                     if (TacticalUtilities.OpenTile(loc, null) && a.CastSpell(Resurrection, null))
                     {
+                        State.GameManager.TacticalMode.Log.RegisterSpellCast(a.Unit, target.Unit, SpellTypes.Resurrection);
                         if (State.GameManager.TacticalMode.IsPlayerInControl && State.GameManager.CurrentScene == State.GameManager.TacticalMode)
                         {
                             TacticalUtilities.CreateResurrectionPanel(loc, a.Unit.Side);
                         }
                         else
                         {
-                            TacticalUtilities.Resurrect(loc, target);
+                            TacticalUtilities.Resurrect(loc, target, a);
                         }
                     }
                 }
@@ -906,11 +907,13 @@ static class SpellList
             OnExecute = (a, t) =>
             {
                 a.CastSpell(AmplifyMagic, t);
+                State.GameManager.TacticalMode.Log.RegisterSpellCast(a.Unit, t.Unit, SpellTypes.AmplifyMagic);
                 int amt = a.Unit.GetStat(Stat.Will) / 25;
                 foreach (var ally in TacticalUtilities.UnitsWithinTiles(t.Position, 1).Where(s => s.Unit.IsDead == false && s.Unit.Side == a.Unit.Side))
                 {
                     ally.Unit.AddFocus(((amt > 1) ? amt : 1));
                     TacticalGraphicalEffects.CreateGenericMagic(a.Position, ally.Position, ally, TacticalGraphicalEffects.SpellEffectIcon.Buff);
+                    State.GameManager.TacticalMode.Log.RegisterSpellHit(a.Unit, ally.Unit, SpellTypes.AmplifyMagic, 0, 1.0f);
                 }
             }
         };
@@ -943,7 +946,7 @@ static class SpellList
             Name = "Evocation",
             Id = "evocation",
             SpellType = SpellTypes.Evocation,
-            Description = "Draw all nearby Unit's Focus onto a target, inspiring it. Grants the target equivalent SpellForce stacks and half as much MP.",
+            Description = "Draw all nearby units' Focus onto a target, inspiring it. Grants the target equivalent SpellForce stacks and half as much AP.",
             AcceptibleTargets = new List<AbilityTargets>() { AbilityTargets.Ally },
             Range = new Range(1),
             Tier = 0,
@@ -953,6 +956,7 @@ static class SpellList
             OnExecute = (a, t) =>
             {
                 a.CastSpell(Evocation, a);
+                State.GameManager.TacticalMode.Log.RegisterSpellCast(a.Unit, t.Unit, SpellTypes.Evocation);
                 int stacks = 0;
                 foreach (var ally in TacticalUtilities.UnitsWithinTiles(t.Position, 1).Where(s => s.Unit.GetStatusEffect(StatusEffectType.Focus) != null))
                 {
@@ -966,6 +970,7 @@ static class SpellList
                 }
                 t.Movement += stacks/2;
                 TacticalGraphicalEffects.CreateGenericMagic(a.Position, t.Position, t, TacticalGraphicalEffects.SpellEffectIcon.PurplePlus);
+                State.GameManager.TacticalMode.Log.RegisterSpellHit(a.Unit, t.Unit, SpellTypes.Evocation, stacks, 1.0f);
             }
         };
         SpellDict[SpellTypes.Evocation] = Evocation;

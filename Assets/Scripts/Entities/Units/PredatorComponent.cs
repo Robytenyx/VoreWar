@@ -2414,7 +2414,7 @@ public class PredatorComponent
                 }
                 target.Visible = false;
                 target.Targetable = false;
-                State.GameManager.TacticalMode.Log.RegisterSpellHit(unit, target.Unit, spell.SpellType, 0, chance);
+                State.GameManager.TacticalMode.Log.RegisterSpellHit(unit, target.Unit, spell.SpellType, 0, chance, preyLocation);
                 State.GameManager.TacticalMode.DirtyPack = true;
 
                 target.Movement = 0;

@@ -771,7 +771,7 @@ static class TacticalUtilities
             sprite.Name.text = unit.Name;
             Button button = obj.GetComponentInChildren<Button>();
             button.GetComponentInChildren<Text>().text = "Resurrect";
-            button.onClick.AddListener(() => Resurrect(loc, actorUnit));
+            button.onClick.AddListener(() => Resurrect(loc, actorUnit, actor));
             button.onClick.AddListener(() => UnitPickerUI.gameObject.SetActive(false));
         }
         UnitPickerUI.ActorFolder.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 300 * (1 + (children) / 3));
@@ -850,7 +850,7 @@ static class TacticalUtilities
         UnitPickerUI.gameObject.SetActive(true);
     }
 
-    internal static void Resurrect(Vec2i loc, Actor_Unit target)
+    internal static void Resurrect(Vec2i loc, Actor_Unit target, Actor_Unit caster)
     {
         var pred = FindPredator(target);
         if (pred != null)
@@ -863,6 +863,7 @@ static class TacticalUtilities
         target.SelfPrey = null;
         target.Surrendered = false;
         UpdateActorLocations();
+        State.GameManager.TacticalMode.Log.RegisterSpellHit(caster.Unit, target.Unit, SpellTypes.Resurrection, 0 , 1.0f);
         if (target.UnitSprite != null)
         {
             target.UnitSprite.transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -903,7 +904,7 @@ static class TacticalUtilities
             target.UnitSprite.FlexibleSquare.gameObject.SetActive(true);
             target.UnitSprite.HealthBar.gameObject.SetActive(true);
         }
-        State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{caster.Name}</b> brought back <b>{target.Unit.Name}</b> as a summon.");
+        State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{caster.Name}</b> brought back <b>{target.Unit.Name}</b> as a summon!");
     }
 
     static internal bool MeetsQualifier(List<AbilityTargets> targets, Actor_Unit actor, Actor_Unit target)

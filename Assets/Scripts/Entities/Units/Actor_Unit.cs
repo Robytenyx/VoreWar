@@ -2411,14 +2411,13 @@ public class Actor_Unit
         State.GameManager.SoundManager.PlaySpellCast(spell, this);
         if (target != null)
         {
+            State.GameManager.TacticalMode.Log.RegisterSpellCast(Unit, target.Unit, spell.SpellType);
             if (spell.AreaOfEffect > 0)
             {
                 foreach (var splashTarget in TacticalUtilities.UnitsWithinTiles(target.Position, spell.AreaOfEffect))
                 {
                     if (PredatorComponent.MagicConsume(spell, splashTarget, preyLocation))
-                    {
                         State.GameManager.SoundManager.PlaySpellHit(spell, splashTarget.UnitSprite.transform.position);
-                    }
                 }
             }
             else
@@ -2431,12 +2430,11 @@ public class Actor_Unit
         }
         else if (targetArea != null && spell.AreaOfEffect > 0)
         {
+            State.GameManager.TacticalMode.Log.RegisterSpellCast(Unit, Unit, spell.SpellType);
             foreach (var splashTarget in TacticalUtilities.UnitsWithinTiles(targetArea, spell.AreaOfEffect))
             {
                 if (PredatorComponent.MagicConsume(spell, splashTarget, preyLocation))
-                {
                     State.GameManager.SoundManager.PlaySpellHit(spell, splashTarget.UnitSprite.transform.position);
-                }
             }
         }
         if (Unit.TraitBoosts.SpellAttacks > 1)
@@ -2458,6 +2456,7 @@ public class Actor_Unit
 
         if (target != null)
         {
+            State.GameManager.TacticalMode.Log.RegisterSpellCast(Unit, target.Unit, spell.SpellType);
             if (spell.AreaOfEffect > 0)
             {
                 foreach (var splashTarget in TacticalUtilities.UnitsWithinTiles(target.Position, spell.AreaOfEffect).Where(s => s.Unit.IsDead == false))
@@ -2478,6 +2477,7 @@ public class Actor_Unit
         }
         else if (targetArea != null && spell.AreaOfEffect > 0)
         {
+            State.GameManager.TacticalMode.Log.RegisterSpellCast(Unit, Unit, spell.SpellType);
             foreach (var splashTarget in TacticalUtilities.UnitsWithinTiles(targetArea, spell.AreaOfEffect).Where(s => s.Unit.IsDead == false))
             {
                 splashTarget.DefendDamageSpell(spell, this, spell.Damage(this, splashTarget));
@@ -2513,6 +2513,7 @@ public class Actor_Unit
         bool hit = false;
 
         State.GameManager.SoundManager.PlaySpellCast(spell, this);
+        State.GameManager.TacticalMode.Log.RegisterSpellCast(Unit, target.Unit, spell.SpellType);
 
         if (target != null)
         {
