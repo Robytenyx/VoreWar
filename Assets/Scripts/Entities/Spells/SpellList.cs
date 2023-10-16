@@ -415,7 +415,7 @@ static class SpellList
             Name = "Summon",
             Id = "summon",
             SpellType = SpellTypes.Summon,
-            Description = "Summons a random monster at 50 % of caster’s experience (Available monsters depend on what monsters are available to hire as mercs, or set to spawn, so that monsters you aren't interested in don't spawn.)",
+            Description = "Summons a random monster at 50% of caster’s experience (Available monsters depend on what monsters are available to hire as mercs, or set to spawn, so that monsters you aren't interested in don't spawn.)",
             AcceptibleTargets = new List<AbilityTargets>() { AbilityTargets.Tile },
             Range = new Range(4),
             Tier = 3,

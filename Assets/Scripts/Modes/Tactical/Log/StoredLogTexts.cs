@@ -888,7 +888,7 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Unit.Name}</b> slaps {GPPHis(i.Unit)} full {i.preyLocation.ToSyn()}, taunting the prey inside.",
             priority: 8),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} let{PluralForPart(i.preyLocation)} out a satisfied gurgle as it works.",
-            priority: 8),
+            priority: 8, conditional: (s) => InStomach(s) && CanBurp(s)),
             new EventString((i) => $"<b>{i.Unit.Name}</b> moans softly while {GPPHis(i.Unit)} stuffed {i.preyLocation.ToSyn()} rumble{PluralForPart(i.preyLocation)} ominously.",
             priority: 8),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> knees buckle for a moment as <b>{i.Target.Name}</b> struggles.",

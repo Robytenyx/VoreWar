@@ -2223,11 +2223,19 @@ public class PredatorComponent
         else if (prey.Unit.IsDead == false)
         {
             if (indent > 0) ret += $"L:{indent} ";
-            ret += $"Digesting {prey.Unit.Name}\n";
+            string actionTag = "Digesting";
+            if (prey.Unit.Side == unit.Side && unit.HasTrait(Traits.Endosoma))
+            {
+                if (unit.HasTrait(Traits.HealingBelly))
+                    actionTag = "Healing";
+                else
+                    actionTag = "Stowing";
+            }
+            ret += $"{actionTag} {prey.Unit.Name}\n";
             if (Config.ExtraTacticalInfo)
             {
                 prey.UpdateEscapeRate();
-                ret += $" loc: {loc}\n escape: {Math.Round(prey.EscapeRate * 100, 2)}%\n health: {Math.Round(prey.Unit.HealthPct * 100, 1)}%\n";
+                ret += $" in {loc}\n Escape: {Math.Round(prey.EscapeRate * 100, 2)}%\n Health: {Math.Round(prey.Unit.HealthPct * 100, 1)}%\n";
             }
 
         }
@@ -2236,7 +2244,7 @@ public class PredatorComponent
             if (indent > 0) ret += $"L:{indent}";
             ret += ($"Absorbing {prey.Unit.Name}\n");
             if (Config.ExtraTacticalInfo)
-                ret += $" loc: {loc}\n absorbed: {Math.Round((float)-prey.Unit.Health / prey.Unit.MaxHealth * 100, 1)}%\n";
+                ret += $" in {loc}\n Absorbed: {Math.Round((float)-prey.Unit.Health / prey.Unit.MaxHealth * 100, 1)}%\n";
         }
         if (prey.SubPrey != null)
         {
