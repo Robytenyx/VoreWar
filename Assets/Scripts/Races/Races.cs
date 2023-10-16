@@ -96,14 +96,15 @@
     static internal Asura Asura = new Asura();
     static internal DRACO DRACO = new DRACO();
     static internal Zoey Zoey = new Zoey();
-    static internal Abakhanskya Abakhanskya = new Abakhanskya();
+    static internal Cierihaka Cierihaka = new Cierihaka();
     static internal Zera Zera = new Zera();
     static internal Auri Aurilika = new Auri();
     static internal Erin Erin = new Erin();
     static internal Salix Salix = new Salix();
     static internal Goodra Goodra = new Goodra();
-
     static internal Whisp Whisp = new Whisp();
+    static internal FeralHorses FeralHorses = new FeralHorses();
+    static internal Abakhanskya Abakhanskya = new Abakhanskya();
     static internal BlankSlate BlankSlate = new BlankSlate();
 
     static internal DefaultRaceData GetRace(Unit unit)
@@ -241,8 +242,8 @@
                 return DRACO;
             case Race.Zoey:
                 return Zoey;
-            case Race.Abakhanskya:
-                return Abakhanskya;
+            case Race.Cierihaka:
+                return Cierihaka;
             case Race.Zera:
                 return Zera;
             case Race.FeralAnts:
@@ -317,6 +318,10 @@
                 return Salix;
             case Race.Aabayx:
                 return Aabayx;
+            case Race.FeralHorses:
+                return FeralHorses;
+            case Race.Abakhanskya:
+                return Abakhanskya;
         }
         UnityEngine.Debug.LogWarning("Couldn't find race, substituting the Blank Slate");
         return BlankSlate;

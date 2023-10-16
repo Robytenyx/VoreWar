@@ -87,6 +87,7 @@
     FeralLions = 137,
     Goodra = 138,
     Whisp = 139,
+    FeralHorses = 140,
 
     Selicia = 170,
     Vision = 171,
@@ -95,9 +96,10 @@
     Asura = 174,
     DRACO = 175,
     Zoey = 176,
-    Abakhanskya = 177,
+    Cierihaka = 177,
     Zera = 178,
     Auri = 179,
     Erin = 180,
     Salix = 181,
+    Abakhanskya = 182,
 }

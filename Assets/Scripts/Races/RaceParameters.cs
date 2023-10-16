@@ -92,13 +92,15 @@ static class RaceParameters
     static readonly RaceTraits Asura;
     static readonly RaceTraits DRACO;
     static readonly RaceTraits Zoey;
-    static readonly RaceTraits Abakhanskya;
+    static readonly RaceTraits Cierihaka;
     static readonly RaceTraits Zera;
     static readonly RaceTraits Auri;
     static readonly RaceTraits Erin;
     static readonly RaceTraits Goodra;
     static readonly RaceTraits Whisp;
     static readonly RaceTraits Salix;
+    static readonly RaceTraits FeralHorses;
+    static readonly RaceTraits Abakhanskya;
 
     static Unit tempUnit;
 
@@ -296,8 +298,8 @@ static class RaceParameters
                 return DRACO;
             case Race.Zoey:
                 return Zoey;
-            case Race.Abakhanskya:
-                return Abakhanskya;
+            case Race.Cierihaka:
+                return Cierihaka;
             case Race.Zera:
                 return Zera;
             case Race.Panthers:
@@ -314,6 +316,10 @@ static class RaceParameters
                 return Whisp;
             case Race.Salix:
                 return Salix;
+            case Race.FeralHorses:
+                return FeralHorses;
+            case Race.Abakhanskya:
+                return Abakhanskya;
             case (Race)700: //Singled out so that it doesn't make the debug message
                 return Default;
             case (Race)701:
@@ -2267,7 +2273,36 @@ static class RaceParameters
         },
             RaceDescription = "With an appearance reminiscent of a reptilian bat, the Dratopyr are likely a hybrid race. Smaller than most monsters but just as fierce, the Dratopyr specialize in weakening their prey while avoiding attempts to fend them off. Dratopyr are very fast breeders and would thus be a major threat to everyone, were it not for their tendency toward cannibalism.",
         };
+        
+        FeralHorses = new RaceTraits()
+        {
+            BodySize = 20,
+            StomachSize = 16,
+            HasTail = true,
+            FavoredStat = Stat.Agility,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            ExpMultiplier = 1.1f,
+            PowerAdjustment = 1.3f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(14, 18),
+                Dexterity = new RaceStats.StatRange(10, 16),
+                Endurance = new RaceStats.StatRange(16, 20),
+                Mind = new RaceStats.StatRange(6, 10),
+                Will = new RaceStats.StatRange(6, 10),
+                Agility = new RaceStats.StatRange(16, 24),
+                Voracity = new RaceStats.StatRange(10, 16),
+                Stomach = new RaceStats.StatRange(10, 16),
+            },
+            RacialTraits = new List<Traits>()
+        {
+            Traits.Charge,
+            Traits.ForcefulBlow,
+            Traits.BornToMove,
 
+        },
+            RaceDescription = "It's a horse!  Go ahead, try to ride one.  I dare you!"
+        };
 
         Selicia = new RaceTraits()
         {
@@ -2483,7 +2518,7 @@ static class RaceParameters
             RaceDescription = "An anthropomorphic tiger shark from another world.  Zoey is typically a lazy girl who loves watching movies and being a general couch-potato.  However, upon realizing she'd been isekai'd into the realm, her gluttony left her interested in trying to stomach the local warriors and monsters with some basic martial arts, joining whichever side would pay her first.",
         };
 
-        Abakhanskya = new RaceTraits()
+        Cierihaka = new RaceTraits()
         {
             BodySize = 90,
             StomachSize = 40,
@@ -2668,6 +2703,35 @@ static class RaceParameters
             InnateSpells = new List<SpellTypes>()
             { SpellTypes.AmplifyMagic, SpellTypes.Evocation, SpellTypes.ManaFlux, SpellTypes.UnstableMana},
             RaceDescription = "A demi-mouse mage from a different, mana rich dimension. Has had trouble adapting to the absence of mana here, but makes do.",
+        };
+        Abakhanskya = new RaceTraits()
+        {
+            BodySize = 500,
+            StomachSize = 480,
+            HasTail = true,
+            FavoredStat = Stat.Stomach,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.Anal },
+            ExpMultiplier = 20f,
+            PowerAdjustment = 100f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(85, 95),
+                Dexterity = new RaceStats.StatRange(50, 60),
+                Endurance = new RaceStats.StatRange(95, 105),
+                Mind = new RaceStats.StatRange(85, 95),
+                Will = new RaceStats.StatRange(85, 95),
+                Agility = new RaceStats.StatRange(45, 55),
+                Voracity = new RaceStats.StatRange(65, 75),
+                Stomach = new RaceStats.StatRange(65, 75),
+            },
+            RacialTraits = new List<Traits>()
+        {
+                Traits.ForcefulBlow,
+                Traits.StrongGullet,
+                Traits.Pounce,
+                Traits.HeavyPounce,
+        },
+            RaceDescription = "Abakhanskya is an ancient dragoness hailing from another realm.  Despite this fact, she has been here for generations upon generations and has quite the body to show for it, absolutely brimming with the nutrients stolen from countless prey throughout the years.  She is an unstoppable force of predatory nature, it is unwise to face her on fair terms.",
         };
 
     }

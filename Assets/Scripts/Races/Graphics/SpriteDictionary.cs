@@ -231,7 +231,7 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] DRACO;
     public Sprite[] Zoey;
     public Sprite[] ZoeyHoliday;
-    public Sprite[] Abakhanskya;
+    public Sprite[] Cierihaka;
     public Sprite[] Zera240;
     public Sprite[] ZeraBelly;
     public Sprite[] ZeraBalls;
@@ -243,6 +243,9 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] Salix;
     public Sprite[] SalixVore;
     public Sprite[] SalixGen;
+    
+    [Header("Bosses")]
+    public Sprite[] Abakhanskya;
 
     [Header("Monsters")]
     public Sprite[] Vagrants;
@@ -291,6 +294,7 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] FeralLions;
     public Sprite[] Goodra;
     public Sprite[] Whisp;
+    public Sprite[] FeralHorses;
 
 
     public Sprite[] Cake;

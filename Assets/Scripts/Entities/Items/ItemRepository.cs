@@ -51,11 +51,13 @@ public enum SpecialItems
     DRACOWeapon,
     ZoeyWeapon,
     ZeraWeapon,
-    AbakWeapon,
+    CierihakaWeapon,
     AurilikaWeapon,
     SalixWeapon,
     ErinWeapon,
     ErinWings,
+    AbaWeapon,
+    AbaArmor,
 }
 
 
@@ -159,6 +161,7 @@ public class ItemRepository
             new Weapon(name:"Lion Fangs", description:"Serrated and pointy (Feline) Canines", cost:4, graphic:0, damage:6, range:1),
 			new Weapon(name:"Goodra Slug Antenna", description:"Goodra's Power Whip", cost:4, graphic:0, damage:5, range:1),
             new Weapon(name:"Whisp fire", description:"Whisp's FoxFire", cost:4, graphic:0, damage:5, range:5, omniWeapon: true, magicWeapon: true),
+            new Weapon(name:"Horse Hooves", description:"A terribly painful kick to the gut!", cost:4, graphic:0, damage:4, range:1),
         };
 
         specialItems = new List<Item>()
@@ -171,11 +174,13 @@ public class ItemRepository
             new Weapon(name:"DRACO's Bite", description:"Bite Attack", cost:4, graphic:0, damage:8, range:1),
             new Weapon(name:"Zoey's Limbs", description:"Fist / Tail Attack", cost:4, graphic:0, damage:6, range:1),
             new Weapon(name:"Zera's Claws", description:"Claw Attack", cost:4, graphic:0, damage:8, range:1),
-            new Weapon(name:"Abakhanskya's Bite", description:"Bite Attack", cost:4, graphic:0, damage:8, range:1),
+            new Weapon(name:"Cierihaka's Bite", description:"Bite Attack", cost:4, graphic:0, damage:8, range:1),
             new Weapon(name:"Aurilika's Gohei", description:"A sacred talisman", cost:4, graphic:0, damage:4, range:1, accuracyModifier: 5f, lockedItem:true),
             new Weapon(name:"Salix's Staff", description:"A weighty magic staff", cost:4, graphic:0, damage:6, range:1, lockedItem:true),
             new Weapon(name:"Nyangel Claws", description:"Near-useless cat scratch!", cost:4, graphic:0, damage:8, range:1),
             new Accessory(name:"Nyangel Wings", description:"The softest, most delicious looking pair of wings you ever did see!\n+5 Willpower", cost:6, changedStat:(int)Stat.Will, statBonus:5 ),
+            new Weapon(name:"Grand Talons", description:"All the better to grasp you with, my dear.", cost:4, graphic:0, damage:12, range:1, lockedItem:true),
+            new Accessory(name:"Grand Plating", description:"Abakhanskya is covered from head to toe in highly durable composite armor plating\n+10 Endurance", cost:6, changedStat:(int)Stat.Endurance, statBonus:10 ),
         };
 
 
