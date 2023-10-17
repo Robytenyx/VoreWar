@@ -996,7 +996,7 @@ static class StrategicUtilities
             MercenaryContainer merc = new MercenaryContainer();
             merc.Unit = unit;
             merc.Title = $"{InfoPanel.RaceSingular(merc.Unit)} - Mercenary";
-            var power = State.RaceSettings.Get(merc.Unit.Race).PowerAdjustment;
+            var power = merc.Unit.GetTraitPowerMod();
             if (power == 0)
             {
                 power = RaceParameters.GetTraitData(merc.Unit).PowerAdjustment;
@@ -1043,7 +1043,7 @@ static class StrategicUtilities
             MercenaryContainer merc = new MercenaryContainer();
             merc.Unit = unit;
             merc.Title = $"{InfoPanel.RaceSingular(merc.Unit)} - Mercenary";
-            var power = State.RaceSettings.Get(merc.Unit.Race).PowerAdjustment;
+            var power = merc.Unit.GetTraitPowerMod();
             if (power == 0)
             {
                 power = RaceParameters.GetTraitData(merc.Unit).PowerAdjustment;

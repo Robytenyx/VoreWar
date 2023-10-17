@@ -73,6 +73,55 @@ public static class PreyLocStrings
     }
 
     /// <summary>
+    /// Gets a random synonym for the body part(s) associatied with the provided <c>PreyLocation</c>., followed by the provided <c>string</c>, appended with an "s" if the random synonym is plural.
+    /// <br></br><example>
+    /// For example:
+    /// <code>
+    /// SynAndPluralForm(PreyLocation.balls, "work");
+    /// </code>
+    /// may return "balls work", "scrotum works", or "nuts work".
+    /// </example>
+    /// </summary>
+    public static string SynAndPluralForm(this PreyLocation preyLocation, string rest)
+    {
+        string part;
+        switch (preyLocation)
+        {
+            case PreyLocation.breasts:
+                part = genRandom(breastSyn);
+                break;
+            case PreyLocation.leftBreast:
+                part = genRandom(breastSyn);
+                break;
+            case PreyLocation.rightBreast:
+                part = genRandom(breastSyn);
+                break;
+            case PreyLocation.balls:
+                part = genRandom(ballsSyn);
+                break;
+            case PreyLocation.stomach:
+                part = genRandom(stomachSyn);
+                break;
+            case PreyLocation.stomach2:
+                part = genRandom(stomachSyn);
+                break;
+            case PreyLocation.womb:
+                part = genRandom(wombSyn);
+                break;
+            case PreyLocation.anal:
+                part = genRandom(analSyn);
+                break;
+            case PreyLocation.tail:
+                part = "tail";
+                break;
+            default:
+                part = "";
+                break;
+        }
+        return $"{part} {rest.Trim()}{(part.EndsWith("s") ? "" : "s")}";
+    }
+
+    /// <summary>
     /// Gets a random synonym for penis.
     /// </summary>
     public static string ToCockSyn()

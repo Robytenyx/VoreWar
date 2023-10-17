@@ -418,7 +418,7 @@ public class Unit
 
     internal bool CanBeConverted()
     {
-        return Type != UnitType.Summon && Type != UnitType.Leader && Type != UnitType.SpecialMercenary && HasTrait(Traits.Eternal) == false && SavedCopy == null;
+        return Type != UnitType.Summon && Type != UnitType.Leader && Type != UnitType.SpecialMercenary && HasTrait(Traits.Eternal) == false && SavedCopy == null && Annihilated == false;
     }
 
     internal bool CanUnbirth => Config.Unbirth && HasVagina;
@@ -574,6 +574,9 @@ public class Unit
 
     [OdinSerialize]
     public Actor_Unit BoundUnit;
+
+    [OdinSerialize]
+    public bool Annihilated;
 
 
     /// <summary>
@@ -1178,6 +1181,10 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         experience += exp;
     }
 
+    /// <summary>
+    /// Adds the passed <c>exp</c> value to the unit's experence.<br></br>Unaffected by experience modifiers.
+    /// </summary>
+    /// <param name="exp">Value to be added to unit's experience.</param>
     public void GiveRawExp(int exp) => experience += exp;
 
     public bool IsDeadAndOverkilledBy(int overkill)
@@ -1229,6 +1236,12 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         experience += exp;
     }
 
+    /// <summary>
+    /// Returns the amount of experience needed for a unit at the passed <c>level</c>  to level up.<br></br>Often displayed as "NEXT" in RPGs.
+    /// </summary>
+    /// <param name="level">The current level of the unit to calculate level up requirement for.</param>
+    /// <param name="expRequiredMod">The multiplier used when calculating the level up requirement.<br></br>Naturally afftected by Clever and Foolish traits.</param>
+    /// <returns></returns>
     public static int GetExperienceRequiredForLevel(int level, float expRequiredMod)
     {
         if (level >= Config.HardLevelCap)
@@ -2945,4 +2958,209 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             return State.RaceSettings.GetConversionRace(Race);
     }
 
+    public float GetTraitPowerMod()
+    {
+        float powerMult = 1.0f;
+        for (int i = 0; i < Tags.Count(); i++)
+        {
+            switch (Tags[i])
+            {
+                case Traits.LightningSpeed:
+                case Traits.DivineBloodline:
+                case Traits.InstantDigestion:
+                case Traits.InstantAbsorption:
+                case Traits.Irresistable:
+                case Traits.Titanic:
+                case Traits.SynchronizedEvolution:
+                    powerMult *= 1.5f;
+                    break;
+                case Traits.GeneEater:
+                case Traits.Inescapable:
+                case Traits.Colossal:
+                case Traits.AdaptiveTactics:
+                case Traits.InfiniteAssimilation:
+                case Traits.UnlimitedCapacity:
+                case Traits.Inedible:
+                    powerMult *= 1.25f;
+                    break;
+                case Traits.PackStrength:
+                case Traits.PackDexterity:
+                case Traits.PackVoracity:
+                case Traits.PackDefense:
+                case Traits.PackWill:
+                case Traits.PackMind:
+                case Traits.PackStomach:
+                case Traits.Tempered:
+                case Traits.Pathfinder:
+                case Traits.EnthrallingDepths:
+                case Traits.WastefulProcessing:
+                    powerMult *= 1.0125f;
+                    break;
+                case Traits.Pounce:
+                case Traits.ShunGokuSatsu:
+                case Traits.Large:
+                case Traits.PeakCondition:
+                case Traits.Reanimator:
+                case Traits.Huge:
+                case Traits.KillerKnowledge:
+                case Traits.EssenceAbsorption:
+                case Traits.PredConverter:
+                case Traits.PredRebirther:
+                    powerMult *= 1.15f;
+                    break;
+                case Traits.PackTactics:
+                case Traits.Ravenous:
+                case Traits.Frenzy:
+                case Traits.ArtfulDodge:
+                case Traits.Flight:
+                case Traits.Maul:
+                case Traits.MetalBody:
+                case Traits.BornToMove:
+                case Traits.Resourceful:
+                case Traits.ForcefulBlow:
+                case Traits.StrongGullet:
+                case Traits.Charge:
+                case Traits.Eternal:
+                case Traits.AcidImmunity:
+                case Traits.QuickShooter:
+                case Traits.FastCaster:
+                case Traits.Petrifier:
+                case Traits.Charmer:
+                case Traits.Binder:
+                case Traits.DigestionConversion:
+                case Traits.DigestionRebirth:
+                case Traits.SeductiveTouch:
+                case Traits.HypnoticGas:
+                    powerMult *= 1.1f;
+                    break;
+                case Traits.Biter:
+                case Traits.AstralCall:
+                case Traits.AcidResistant:
+                case Traits.Dazzle:
+                case Traits.MadScience:
+                case Traits.RangedVore:
+                case Traits.TailStrike:
+                case Traits.PollenProjector:
+                case Traits.Webber:
+                case Traits.GlueBomb:
+                case Traits.HardSkin:
+                case Traits.PoisonSpit:
+                case Traits.LuckySurvival:
+                case Traits.Fit:
+                case Traits.AllOutFirstStrike:
+                    powerMult *= 1.075f;
+                    break;
+                case Traits.EscapeArtist:
+                case Traits.DefensiveStance:
+                case Traits.Intimidating:
+                case Traits.ThrillSeeker:
+                case Traits.BoggingSlime:
+                case Traits.Paralyzer:
+                case Traits.TentacleHarassment:
+                case Traits.MetabolicSurge:
+                case Traits.Stinger:
+                case Traits.Bulky:
+                case Traits.Camaraderie:
+                case Traits.Toxic:
+                case Traits.Vampirism:
+                case Traits.TasteForBlood:
+                case Traits.StretchyInsides:
+                case Traits.KeenShot:
+                case Traits.ManaDrain:
+                case Traits.BladeDance:
+                case Traits.AntPheromones:
+                case Traits.Reformer:
+                case Traits.Revenant:
+                case Traits.VenomShock:
+                case Traits.Tenacious:
+                case Traits.Berserk:
+                case Traits.EfficientGuts:
+                case Traits.Temptation:
+                case Traits.Assimilate:
+                case Traits.AdaptiveBiology:
+                    powerMult *= 1.05f;
+                    break;
+                case Traits.Resilient:
+                case Traits.AdeptLearner:
+                case Traits.EvasiveBattler:
+                case Traits.ProlificBreeder:
+                case Traits.GelatinousBody:
+                case Traits.KeenReflexes:
+                case Traits.NimbleClimber:
+                case Traits.DualStomach:
+                case Traits.HeavyPounce:
+                case Traits.MagicResistance:
+                case Traits.MagicProwess:
+                case Traits.FearsomeAppetite:
+                case Traits.Endosoma:
+                case Traits.SteadyStomach:
+                case Traits.PleasurableTouch:
+                case Traits.HotBlooded:
+                case Traits.FocusedDevelopment:
+                case Traits.ManaRich:
+                case Traits.HealingBlood:
+                case Traits.SenseWeakness:
+                case Traits.LightFrame:
+                case Traits.Featherweight:
+                case Traits.VenomousBite:
+                case Traits.Honeymaker:
+                case Traits.WetNurse:
+                case Traits.HealingBelly:
+                    powerMult *= 1.025f;
+                    break;
+                case Traits.SlowBreeder:
+                case Traits.Feral:
+                    powerMult *= 0.975f;
+                    break;
+                case Traits.EasyToVore:
+                case Traits.Prey:
+                    powerMult *= 0.9f;
+                    break;
+                case Traits.WillingRace:
+                case Traits.Submissive:
+                case Traits.Defenseless:
+                case Traits.Infertile:
+                    powerMult *= 0.85f;
+                    break;
+                case Traits.Tiny:
+                    powerMult *= 0.5f;
+                    break;
+                case Traits.StrongMelee:
+                case Traits.Clever:
+                case Traits.FastDigestion:
+                    powerMult *= 10.0f / 9;
+                    break;
+                case Traits.WeakAttack:
+                case Traits.Foolish:
+                case Traits.SlowDigestion:
+                case Traits.SoftBody:
+                case Traits.SlowMetabolism:
+                case Traits.Clumsy:
+                case Traits.IdealSustenance:
+                    powerMult *= 9.0f / 10;
+                    break;
+                case Traits.FastAbsorption:
+                case Traits.IronGut:
+                    powerMult *= 20.0f / 19;
+                    break;
+                case Traits.SlowAbsorption:
+                case Traits.Nauseous:
+                case Traits.HighlyAbsorbable:
+                    powerMult *= 19.0f / 20;
+                    break;
+                case Traits.Lethargic:
+                case Traits.Illness:
+                    powerMult *= 1.0f / 1.05f;
+                    break;
+                case Traits.Small:
+                case Traits.RangedIneptitude:
+                case Traits.Diseased:
+                    powerMult *= 1.0f / 1.15f;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return powerMult;
+    }
 }

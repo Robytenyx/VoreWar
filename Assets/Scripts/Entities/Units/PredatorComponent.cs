@@ -1337,7 +1337,20 @@ public class PredatorComponent
         }
         if (unit.HasTrait(Traits.Annihilation) && !TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
         {
-           
+            if (preyUnit.Unit.Level > 1)
+            {
+                int changeVal = (int)(preyUnit.Unit.Experience - preyUnit.Unit.GetExperienceRequiredForLevel(preyUnit.Unit.Level - 2));
+                unit.GiveRawExp(changeVal);
+                preyUnit.Unit.GiveRawExp(-changeVal);
+                preyUnit.Unit.LevelDown();
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{unit.Name}</b>'s {PreyLocStrings.SynAndPluralForm(preyUnit.Location, "melt")} away at <b>{preyUnit.Unit.Name}</b>, now only Level {preyUnit.Unit.Level}.");
+            }
+            else
+            {
+                unit.GiveRawExp(preyUnit.Unit.GetStatTotal());
+                preyUnit.Unit.Annihilated = true;
+                preyUnit.Actor.Unit.Health = -preyUnit.Actor.Unit.MaxHealth;
+            }
         }
         if (preyUnit.Unit.IsThisCloseToDeath(preyDamage))
         {
@@ -1453,7 +1466,7 @@ public class PredatorComponent
         {
             TacticalUtilities.Log.RegisterNearDigestion(unit, preyUnit.Unit, Location(preyUnit));
         }
-        else if (preyUnit.Unit.IsDead == false && State.Rand.Next(6) == 0 && preyDamage > 0)
+        else if (preyUnit.Unit.IsDead == false && State.Rand.Next(6) == 0 && (preyDamage > 0 || (preyUnit.Unit.Side == unit.Side && unit.HasTrait(Traits.Endosoma))))
         {
             TacticalUtilities.Log.LogDigestionRandom(unit, preyUnit.Unit, Location(preyUnit));
         }
@@ -1476,8 +1489,9 @@ public class PredatorComponent
             if (healthReduction >= preyUnit.Unit.MaxHealth + preyUnit.Unit.Health)
                 healthReduction = preyUnit.Unit.MaxHealth + preyUnit.Unit.Health + 1;
             preyUnit.Actor.SubtractHealth(healthReduction);
-            totalHeal += Math.Max((int)(healthReduction / 2 * preyUnit.Unit.TraitBoosts.Outgoing.Nutrition * unit.TraitBoosts.Incoming.Nutrition), 1);
-            var baseManaGain = healthReduction * (preyUnit.Unit.TraitBoosts.Outgoing.ManaAbsorbHundreths + unit.TraitBoosts.Incoming.ManaAbsorbHundreths);
+            int finalSingHeal = (int)(healthReduction * preyUnit.Unit.TraitBoosts.Outgoing.Nutrition * unit.TraitBoosts.Incoming.Nutrition);
+            totalHeal += Math.Max((int)(finalSingHeal / 2f), 1);
+            var baseManaGain = finalSingHeal * (preyUnit.Unit.TraitBoosts.Outgoing.ManaAbsorbHundreths + unit.TraitBoosts.Incoming.ManaAbsorbHundreths);
             var totalManaGain = baseManaGain / 100 + (State.Rand.Next(100) < (baseManaGain % 100) ? 1 : 0);
             unit.RestoreMana(totalManaGain);
             foreach (IVoreCallback callback in Callbacks)
@@ -3206,6 +3220,16 @@ public class PredatorComponent
         // return Mathf.RoundToInt(Mathf.Clamp(preyUnit.Unit.Experience / 20, 0, (State.RaceSettings.GetBodySize(preyUnit.Actor.Unit.Race) * ((preyUnit.Predator.Unit.HasTrait(Traits.Honeymaker) ? 1 : 0) + 1))) * preyUnit.Unit.TraitBoosts.Outgoing.Nutrition);
     }
 
+    public int CalcFeedCost(Actor_Unit user)
+    {
+        return 1 + user.MaxMovement() / (2 + (user.Unit.HasTrait(Traits.WetNurse) ? 1 : 0));
+    }
+
+    public float GetHealValue(Actor_Unit target)
+    {
+        return (float)CalcFeedValue(target, "any").Item1[0] / target.Unit.MaxHealth;
+    }
+
     public bool Feed(Actor_Unit target)
     {
         if (target.Unit.Side != actor.Unit.Side || target.Surrendered || target.Position.GetNumberOfMovesDistance(actor.Position) > 1 || actor.Movement == 0 || !CanFeed())
@@ -3232,7 +3256,7 @@ public class PredatorComponent
         {
             target.AddCorruption(unit.GetStatTotal() / 10, unit.FixedSide);
         }
-        int halfMovement = 1 + actor.MaxMovement() / (2 + (actor.Unit.HasTrait(Traits.WetNurse) ? 1 : 0));
+        int halfMovement = CalcFeedCost(actor);
         if (actor.Movement > halfMovement)
             actor.Movement -= halfMovement;
         else
@@ -3267,9 +3291,9 @@ public class PredatorComponent
         {
             target.AddCorruption(unit.GetStatTotal()/10, unit.FixedSide);
         }
-        int quarterMovement = 1 + actor.MaxMovement() / (4 + (actor.Unit.HasTrait(Traits.WetNurse) ? 1 : 0));
-        if (actor.Movement > quarterMovement)
-            actor.Movement -= quarterMovement;
+        int halfMovement = CalcFeedCost(actor);
+        if (actor.Movement > halfMovement)
+            actor.Movement -= halfMovement;
         else
             actor.Movement = 0;
         UpdateFullness();

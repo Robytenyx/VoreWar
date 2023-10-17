@@ -179,7 +179,7 @@ public enum Traits
     SlowMovement = 90,
     /// <summary>Unit's movement is reduced by 45%, but movement penalties from prey are nullified and minimum movement is raised to 2.</summary>
     VerySlowMovement = 91,
-    /// <summary>No healing is provided when absordbing this unit, and there is a 1/8 chance of being poisoned when attacking this unit.</summary>
+    /// <summary>No healing is provided when absorbing this unit, and there is a 1/8 chance of being poisoned when attacking this unit.</summary>
     Toxic = 92,
     /// <summary>Allows unit to use <b>Glue Bomb</b>, an attack that reduces movement once per battle.</summary>
     GlueBomb = 93,
@@ -424,7 +424,7 @@ public enum Traits
     Assimilate = 252,
     /// <summary>Cheat Trait: Unit gains random trait from prey upon absorption. If unit has already gained 3 traits this way, the new trait replace the oldest trait.</summary>
     AdaptiveBiology = 253,
-    /// <summary>Cheat Trait: Increases unit's scale by 3x.</summary>
+    /// <summary>Cheat Trait: Increases unit's scale by 2x.</summary>
     Huge = 254,
     /// <summary>Cheat Trait: Increases unit's scale by 2.5x.</summary>
     Colossal = 255,
@@ -454,9 +454,9 @@ public enum Traits
     SeductiveTouch = 266,
     /// <summary>Can emit Gas that turns foes into subservient non-combatants once per battle.</summary>
     HypnoticGas = 295,
-    /// <summary>Every time digestion progresses, this unit steals one trait from each prey inside them, if only duplicates (or non-assimilable traits) remain, they are turned into exp. Absorbtion steals any that are left.</summary>
+    /// <summary>Every time digestion progresses, this unit steals one trait from each prey inside them, if only duplicates (or non-assimilable traits) remain, they are turned into exp. Absorption steals any that are left.</summary>
     Extraction = 296,    
-    /// <summary>Every time digestion progresses, this unit digests one level from each prey inside them, gaining its experience value. If a unit hits level 0 this way, it dies if it was stil alive and cannot be revived.</summary>
+    /// <summary>Every time digestion progresses, this unit digests one level from each prey inside them, gaining its experience value. If a unit hits level 0 this way, it dies if it was still alive and cannot be revived.</summary>
     Annihilation = 297,
     /// <summary>Shares generic traits with pred</summary>
     Symbiote = 298,

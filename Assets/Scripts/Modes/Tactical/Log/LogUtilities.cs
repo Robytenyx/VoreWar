@@ -145,6 +145,11 @@ static class LogUtilities
         return "";
     }
 
+    internal static Actor_Unit GetActor(Unit unit)
+    {
+        return TacticalUtilities.GetActorOf(unit);
+    }
+
     internal static string BoyGirl(Unit unit)
     {
         if (unit.DefaultBreastSize >= 0 && unit.DickSize < 0)

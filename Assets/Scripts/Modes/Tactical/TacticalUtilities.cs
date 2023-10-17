@@ -689,7 +689,7 @@ static class TacticalUtilities
 
     static internal Actor_Unit FindUnitToResurrect(Actor_Unit caster)
     {
-        Actor_Unit actor = Units.Where(s => s.Unit.Side == caster.Unit.Side && s.Unit.IsDead && s.Unit.Type != UnitType.Summon).OrderByDescending(s => s.Unit.Experience).FirstOrDefault();
+        Actor_Unit actor = Units.Where(s => s.Unit.Side == caster.Unit.Side && s.Unit.IsDead && s.Unit.Type != UnitType.Summon && !s.Unit.Annihilated).OrderByDescending(s => s.Unit.Experience).FirstOrDefault();
         return actor;
     }
 

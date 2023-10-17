@@ -1410,7 +1410,7 @@ public class Village
             }
         }
 
-        var power = State.RaceSettings.Get(merc.Unit.Race).PowerAdjustment;
+        var power = merc.Unit.GetTraitPowerMod();
         if (power == 0)
         {
             power = RaceParameters.GetTraitData(merc.Unit).PowerAdjustment;
@@ -1474,7 +1474,7 @@ public class Village
             }
         }
 
-        var power = State.RaceSettings.Get(merc.Unit.Race).PowerAdjustment;
+        var power = merc.Unit.GetTraitPowerMod();
         if (power == 0)
         {
             power = RaceParameters.GetTraitData(merc.Unit).PowerAdjustment;

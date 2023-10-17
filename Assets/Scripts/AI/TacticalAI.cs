@@ -1706,10 +1706,14 @@ public abstract class TacticalAI : ITacticalAI
         }
     }
 
-    public void RunFeed(Actor_Unit actor, string feedType, bool forCombatHealing = false)
+    public void RunFeed(Actor_Unit actor, string feedType, bool forCombatHealing = false, string mode = "")
     {
+        List<PotentialTarget> targets;
+        if (mode == "Scarab")
+            targets = GetListOfPotentialMultiFeedTargets(actor);
+        else
+            targets = GetListOfPotentialFeedTargets(actor);
         // Fail if no possible targets
-        List<PotentialTarget> targets = GetListOfPotentialFeedTargets(actor);
         if (!targets.Any())
             return;
         if (targets[0].chance <= 1.0f && forCombatHealing)
@@ -1769,6 +1773,45 @@ public abstract class TacticalAI : ITacticalAI
         if (primeTarget != null)
             return new List<PotentialTarget>() { primeTarget };
         return targets.OrderBy(t => t.chance).ToList();
+    }
+
+    List<PotentialTarget> GetListOfPotentialMultiFeedTargets(Actor_Unit actor)
+    {
+        List<PotentialTarget> targets = new List<PotentialTarget>();
+        // Check every unit on the field...
+        foreach (Actor_Unit unit in actors)
+        {
+            // As long as they're an ally and can be targeted...
+            if (unit.Targetable && unit.Unit.Side == AISide)
+            {
+                // Get the distance from the target...
+                int distance = unit.Position.GetNumberOfMovesDistance(actor.Position);
+                // As long as the user has the AP to cover the distance...
+                if (distance < actor.Movement)
+                {
+                    // If the user can't reach the target, the target is at max HP, or the target is the user...
+                    if ((distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false) || (unit.Unit.HealthPct == 1.0f && !Config.OverhealEXP) || unit == actor)
+                        // Forget it
+                        continue;
+                    // Calculate the value of the feed
+                    float healValue = actor.PredatorComponent.GetHealValue(unit);
+                    // Calculate leftover AP after feeding target
+                    int leftoverAP = Math.Max(actor.Movement - (distance + actor.PredatorComponent.CalcFeedCost(actor)), 0);
+                    // If the user can act again after feeding the target...
+                    if (leftoverAP > 0)
+                        // Add the target as a high-priority target
+                        targets.Add(new PotentialTarget(unit, 1 + leftoverAP + healValue, distance, 0, leftoverAP + healValue));
+                    // Otherwise...
+                    else
+                        // Add the target as a low-priority target
+                        targets.Add(new PotentialTarget(unit, 1 + healValue, distance, 0, healValue));
+                }
+            }
+        }
+        PotentialTarget primeTarget = targets.OrderBy(s => s.utility).FirstOrDefault();
+        if (primeTarget != null)
+            return new List<PotentialTarget>() { primeTarget };
+        return targets.OrderBy(t => t.utility).ToList();
     }
 
     public void RunSuckle(Actor_Unit actor)
