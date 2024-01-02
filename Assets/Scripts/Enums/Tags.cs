@@ -452,16 +452,6 @@ public enum Traits
     PredRebirther = 265,
     /// <summary>When this unit rubs the belly of a foe that has not been attacked in the last two turns, there is a chance for that foe to be stunned or switch sides.</summary>
     SeductiveTouch = 266,
-    /// <summary>Can emit Gas that turns foes into subservient non-combatants once per battle.</summary>
-    HypnoticGas = 295,
-    /// <summary>Every time digestion progresses, this unit steals one trait from each prey inside them, if only duplicates (or non-assimilable traits) remain, they are turned into exp. Absorption steals any that are left.</summary>
-    Extraction = 296,    
-    /// <summary>Every time digestion progresses, this unit digests one level from each prey inside them, gaining its experience value. If a unit hits level 0 this way, it dies if it was still alive and cannot be revived.</summary>
-    Annihilation = 297,
-    /// <summary>Shares generic traits with pred</summary>
-    Symbiote = 298,
-    /// <summary>creates a spawn unit on prey Absorption</summary>
-    CreateSpawn = 299,
 
     // Growth-related section
     /// <summary>Unit increases in size when absorbing prey.</summary>
@@ -481,8 +471,20 @@ public enum Traits
     /// <summary>Unit's absorption growth decays 2x as fast.</summary>
     FleetingGrowth = 274,
     /// <summary>Doubles healing provided when absorbing unit and increases growth provided by 50%.</summary>
-    ProteinRich = 275
+    ProteinRich = 275,
 
+    /// <summary>Can emit Gas that turns foes into subservient non-combatants once per battle.</summary>
+    HypnoticGas = 295,
+    /// <summary>Every time digestion progresses, this unit steals one trait from each prey inside them, if only duplicates (or non-assimilable traits) remain, they are turned into exp. Absorbtion steals any that are left.</summary>
+    Extraction = 296,
+    /// <summary>Every time digestion progresses, this unit digests one level from each prey inside them, gaining its experience value. If a unit hits level 0 this way, it dies if it was stil alive and cannot be revived.</summary>
+    Annihilation = 297,
+    /// <summary>Shares generic traits with pred</summary>
+    Symbiote = 298,
+    /// <summary>creates a spawn unit on prey Absorption</summary>
+    CreateSpawn = 299,
+    /// <summary>Every time digestion progresses, this unit digests one level from each prey inside them, gaining its experience value. If a unit hits level 0 this way, it dies if it was stil alive and cannot be revived.</summary>
+    EXPDrain = 300,
 }
 
 static class TraitsMethods

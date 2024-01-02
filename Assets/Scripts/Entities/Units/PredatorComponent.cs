@@ -1024,17 +1024,22 @@ public class PredatorComponent
         int totalHeal = 0;
         foreach (Prey preyUnit in prey.ToList())
         {
+            // Skip digesting unit if digestion is caused by feeding and unit is not in appropriate location
             if ((preyUnit.Location != PreyLocation.breasts && feedType == "breastfeed") || (preyUnit.Location != PreyLocation.balls && feedType == "cumfeed"))
                 break;
+
+            // Apply WillingPrey status if pred has EnthrallingDepths trait or if prey recieved Hypnotized status from pred's side
             if (unit.HasTrait(Traits.EnthrallingDepths) || preyUnit.Unit.GetStatusEffect(StatusEffectType.Hypnotized)?.Strength == unit.FixedSide)
-            {
                 preyUnit.Unit.ApplyStatusEffect(StatusEffectType.WillingPrey, 0, 3);
-            }
+
+            // Calc digestion damage
             int preyDamage = CalculateDigestionDamage(preyUnit);
             if (preyUnit.Predator.Unit.HasTrait(Traits.Honeymaker) && preyUnit.Unit.IsDead && (preyUnit.Location == PreyLocation.breasts || preyUnit.Location == PreyLocation.leftBreast || preyUnit.Location == PreyLocation.rightBreast))
                 preyDamage /= 2;
             if (preyUnit.TurnsDigested < preyUnit.Unit.TraitBoosts.DigestionImmunityTurns)
                 preyDamage = 0;
+
+            // Handle tail(maw) vore
             if (tail.Contains(preyUnit))
             {
                 if (preyUnit.TurnsBeingSwallowed >= 1)
@@ -1050,8 +1055,8 @@ public class PredatorComponent
                 }
             }
 
+            // Handle DualStomach trait
             if (unit.HasTrait(Traits.DualStomach))
-            {
                 if (stomach.Contains(preyUnit))
                 {
                     if (preyUnit.TurnsBeingSwallowed >= 2)
@@ -1060,29 +1065,23 @@ public class PredatorComponent
                         stomach2.Add(preyUnit);
                     }
                     else
-                    {
                         preyUnit.TurnsBeingSwallowed++;
-                    }
                 }
-            }
 
+            // Handle CumGestation
             if (actor.PredatorComponent.IsUnitInPrey(preyUnit.Actor, PreyLocation.womb) && actor.PredatorComponent.birthStatBoost > 0 && preyUnit.Unit.GetApparentSide(unit) == unit.FixedSide && Config.KuroTenkoEnabled && Config.CumGestation)
-            {
                 while (actor.PredatorComponent.birthStatBoost > 0)
                 {
                     int stat = UnityEngine.Random.Range(0, 8);
                     preyUnit.Unit.ModifyStat(stat, 1);
                     if (stat == 6)
-                    {
                         preyUnit.Unit.Health += 2;
-                    }
                     if (stat == 0)
-                    {
                         preyUnit.Unit.Health += 1;
-                    }
                     actor.PredatorComponent.birthStatBoost--;
                 }
-            }
+
+            // Handle Endosoma
             if (TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
             {
                 if (unit.HasTrait(Traits.HealingBelly))
@@ -1114,14 +1113,12 @@ public class PredatorComponent
                     preyUnit.Actor.sidesAttackedThisBattle = new List<int>();
                 }
                 //if (preyUnit.Unit.HasTrait(Traits.Shapeshifter) || preyUnit.Unit.HasTrait(Traits.Skinwalker))
-                //{
                 //    preyUnit.Unit.AcquireShape(unit);
-                //}
                 preyUnit.Unit.ReloadTraits();
                 preyUnit.Unit.InitializeTraits();
 
             }
-            else if (Config.FriendlyRegurgitation && unit.HasTrait(Traits.Greedy) == false && preyUnit.Unit.GetApparentSide(actor.Unit) == actor.Unit.FixedSide && TacticalUtilities.GetMindControlSide(preyUnit.Unit) == -1 && preyUnit.Unit.Health > 0 && preyUnit.Actor.Surrendered == false && PreyCanAutoEscape(preyUnit))
+            else if (Config.FriendlyRegurgitation && !unit.HasTrait(Traits.Greedy) && preyUnit.Unit.GetApparentSide(actor.Unit) == actor.Unit.FixedSide && TacticalUtilities.GetMindControlSide(preyUnit.Unit) == -1 && preyUnit.Unit.Health > 0 && !preyUnit.Actor.Surrendered  && PreyCanAutoEscape(preyUnit))
             {
                 State.GameManager.TacticalMode.TacticalStats.RegisterRegurgitation(unit.Side);
                 TacticalUtilities.Log.RegisterRegurgitated(unit, preyUnit.Unit, Location(preyUnit));
@@ -1129,10 +1126,13 @@ public class PredatorComponent
                 continue;
             }
 
+            // Apply digestion damage/healing
             if (preyDamage > 0)
                 totalHeal += DigestOneUnit(preyUnit, preyDamage);
             else
                 DigestOneUnit(preyUnit, preyDamage);
+
+            // Handle Growth
             if (unit.HasTrait(Traits.Growth))
             {
                 unit.BaseScale += ((float)totalHeal / preyUnit.Unit.MaxHealth * .2d) * CalculateGrowthValue(preyUnit);
@@ -1165,8 +1165,11 @@ public class PredatorComponent
 
     int CalculateDigestionDamage(Prey preyUnit)
     {
+        // Return no damage when digestion immunities are in play
         if (preyUnit.TurnsDigested < preyUnit.Unit.TraitBoosts.DigestionImmunityTurns || preyUnit.Unit.HasTrait(Traits.TheGreatEscape))
             return 0;
+        if (unit.HasTrait(Traits.Annihilation))
+            return preyUnit.Unit.Health / preyUnit.Unit.Level;
 
         float usedCapacity = TotalCapacity() - FreeCap();
         float PredStomach = Mathf.Pow(unit.GetStat(Stat.Stomach) + 15, 1.5f);
@@ -1298,58 +1301,61 @@ public class PredatorComponent
         var location = preyUnit.Location;
         int totalHeal = 0;
         bool freshKill = false;
-        if (unit.HasTrait(Traits.Extraction) && !TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
+        if (!TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
         {
-            if (preyUnit.Unit.GetTraits.Any())
+            if (unit.HasTrait(Traits.Extraction))
             {
-                var trait = preyUnit.Unit.GetTraits[State.Rand.Next(preyUnit.Unit.GetTraits.Count)];
-                var possibleTraits = preyUnit.Unit.GetTraits.Where(s => unit.GetTraits.Contains(s) == false && State.AssimilateList.CanGet(s)).ToArray();
-                if (possibleTraits.Any())
+                if (preyUnit.Unit.GetTraits.Any())
                 {
-                    trait = possibleTraits[State.Rand.Next(possibleTraits.Length)];
-                    if (unit.HasTrait(Traits.SynchronizedEvolution))
+                    var trait = preyUnit.Unit.GetTraits[State.Rand.Next(preyUnit.Unit.GetTraits.Count)];
+                    var possibleTraits = preyUnit.Unit.GetTraits.Where(s => unit.GetTraits.Contains(s) == false && State.AssimilateList.CanGet(s)).ToArray();
+                    if (possibleTraits.Any())
                     {
-                        RaceSettingsItem item = State.RaceSettings.Get(unit.Race);
-                        item.RaceTraits.Add(trait);
-                        UpdateRaceTraits();
+                        trait = possibleTraits[State.Rand.Next(possibleTraits.Length)];
+                        if (unit.HasTrait(Traits.SynchronizedEvolution))
+                        {
+                            RaceSettingsItem item = State.RaceSettings.Get(unit.Race);
+                            item.RaceTraits.Add(trait);
+                            UpdateRaceTraits();
+                        }
+                        else
+                        {
+                            unit.AddPermanentTrait(trait);
+                            //process vore traits appropriately
+                            if (TraitList.GetTrait(trait) is IVoreCallback callback)
+                            {
+                                if (callback.IsPredTrait == true)
+                                    callback.OnSwallow(preyUnit, actor, location);
+                                else
+                                    callback.OnRemove(preyUnit, actor, location);
+                            }
+                            UpdateUnitTraits();
+                        }
                     }
                     else
                     {
-                        unit.AddPermanentTrait(trait);
-                        //process vore traits appropriately
-                        if (TraitList.GetTrait(trait) is IVoreCallback callback)
-                        {
-                            if (callback.IsPredTrait == true)
-                                callback.OnSwallow(preyUnit, actor, location);
-                            else
-                                callback.OnRemove(preyUnit, actor, location);
-                        }
-                        UpdateUnitTraits();
+                        unit.GiveRawExp(5);
+                        actor.UnitSprite.DisplayDamage(5, false, true);
                     }
+                    preyUnit.Unit.RemoveTrait(trait);
+                }
+            }
+            if (unit.HasTrait(Traits.Annihilation))
+            {
+                if (preyUnit.Unit.Level > 1)
+                {
+                    int changeVal = (int)(preyUnit.Unit.Experience - preyUnit.Unit.GetExperienceRequiredForLevel(preyUnit.Unit.Level - 2));
+                    unit.GiveRawExp(changeVal);
+                    preyUnit.Unit.GiveRawExp(-changeVal);
+                    preyUnit.Unit.LevelDown();
+                    State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{unit.Name}</b>'s {PreyLocStrings.SynAndPluralForm(preyUnit.Location, "melt")} away at <b>{preyUnit.Unit.Name}</b>, now only Level {preyUnit.Unit.Level}.");
                 }
                 else
                 {
-                    unit.GiveRawExp(5);
-                    actor.UnitSprite.DisplayDamage(5, false, true);
+                    unit.GiveRawExp(preyUnit.Unit.GetStatTotal());
+                    preyUnit.Unit.Annihilated = true;
+                    preyUnit.Actor.Unit.Health = -preyUnit.Actor.Unit.MaxHealth;
                 }
-                preyUnit.Unit.RemoveTrait(trait);
-            }            
-        }
-        if (unit.HasTrait(Traits.Annihilation) && !TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
-        {
-            if (preyUnit.Unit.Level > 1)
-            {
-                int changeVal = (int)(preyUnit.Unit.Experience - preyUnit.Unit.GetExperienceRequiredForLevel(preyUnit.Unit.Level - 2));
-                unit.GiveRawExp(changeVal);
-                preyUnit.Unit.GiveRawExp(-changeVal);
-                preyUnit.Unit.LevelDown();
-                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{unit.Name}</b>'s {PreyLocStrings.SynAndPluralForm(preyUnit.Location, "melt")} away at <b>{preyUnit.Unit.Name}</b>, now only Level {preyUnit.Unit.Level}.");
-            }
-            else
-            {
-                unit.GiveRawExp(preyUnit.Unit.GetStatTotal());
-                preyUnit.Unit.Annihilated = true;
-                preyUnit.Actor.Unit.Health = -preyUnit.Actor.Unit.MaxHealth;
             }
         }
         if (preyUnit.Unit.IsThisCloseToDeath(preyDamage))
