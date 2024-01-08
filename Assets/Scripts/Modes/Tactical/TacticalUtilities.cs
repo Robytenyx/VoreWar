@@ -1051,6 +1051,7 @@ static class TacticalUtilities
         }
         else
         {
+            Log.RegisterForcefeedFail(actor.Unit, targetPred.Unit);
             State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{actor.Unit.Name}</b> couldn't force feed {LogUtilities.GPPHimself(actor.Unit)} to <b>{targetPred.Unit.Name}</b>.");
             actor.Movement = 0;
         }

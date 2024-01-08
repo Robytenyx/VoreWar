@@ -2,8 +2,10 @@
 
 public static class PreyLocStrings
 {
+    static readonly List<string> mouthSyn = new List<string>() { "mouth", "maw", "gullet", "jaw", "mug", "piehole", "muzzle"};
     static readonly List<string> wombSyn = new List<string>() { "womb", "lower belly", "pussy", "slit", "muff", "cunt" };
     static readonly List<string> breastSyn = new List<string>() { "breasts", "bosom", "bust", "mammaries", "boobs", "cleavage", "tits" };
+    static readonly List<string> breastSynSing = new List<string>() { "breast", "mammary", "boob", "tit" };
     static readonly List<string> breastSynPlural = new List<string>() { "breasts", "mammaries", "boobs", "tits" };
     static readonly List<string> ballsSyn = new List<string>() { "balls", "scrotum", "testicles", "nuts", "orbs", "nutsack" };
     static readonly List<string> ballsSynSing = new List<string>() { "scrotum", "nutsack", "sack", "ballsack" };
@@ -73,16 +75,22 @@ public static class PreyLocStrings
     }
 
     /// <summary>
-    /// Gets a random synonym for the body part(s) associatied with the provided <c>PreyLocation</c>., followed by the provided <c>string</c>, appended with an "s" if the random synonym is plural.
+    /// Gets a random synonym for the body part(s) associatied with the provided <c>PreyLocation</c>., followed by the provided <c>string</c>(s), appended with "s"(s) if the random synonym is plural.
     /// <br></br><example>
     /// For example:
     /// <code>
     /// SynAndPluralForm(PreyLocation.balls, "work");
     /// </code>
     /// may return "balls work", "scrotum works", or "nuts work".
+    /// 
+    /// 
+    /// <code>
+    /// SynAndPluralForm(PreyLocation.balls, "quiver", "and shake");
+    /// </code>
+    /// may return "balls quiver and shake", "scrotum quivers and shakes", "testicles quiver and shake", "nuts quiver and shake".
     /// </example>
     /// </summary>
-    public static string SynAndPluralForm(this PreyLocation preyLocation, string rest)
+    public static string SynAndPluralForm(this PreyLocation preyLocation, params string[] rest)
     {
         string part;
         switch (preyLocation)
@@ -118,7 +126,79 @@ public static class PreyLocStrings
                 part = "";
                 break;
         }
-        return $"{part} {rest.Trim()}{(part.EndsWith("s") ? "" : "s")}";
+        string result = part;
+        for (int i = 0; i < rest.Length; i++)
+        {
+            rest[i] = rest[i].Trim();
+            if (part.EndsWith("s"))
+            {
+                if (rest[i].EndsWith("s"))
+                    result += " " + rest[i].LastIndexOf("s");
+                else
+                    result += " " + rest[i];
+            }
+            else
+            {
+                if (rest[i].EndsWith("s"))
+                    result += " " + rest[i];
+                else
+                    result += " " + rest[i] + "s";
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Gets a random synonym for the body part(s) associatied with the provided <c>PreyLocation</c>., followed "is" or "are" as appropiate to the plurality of the synonym.
+    /// </summary>
+    public static string PartIsAre(this PreyLocation preyLocation)
+    {
+        string part;
+        switch (preyLocation)
+        {
+            case PreyLocation.breasts:
+                part = genRandom(breastSyn);
+                break;
+            case PreyLocation.leftBreast:
+                part = genRandom(breastSyn);
+                break;
+            case PreyLocation.rightBreast:
+                part = genRandom(breastSyn);
+                break;
+            case PreyLocation.balls:
+                part = genRandom(ballsSyn);
+                break;
+            case PreyLocation.stomach:
+                part = genRandom(stomachSyn);
+                break;
+            case PreyLocation.stomach2:
+                part = genRandom(stomachSyn);
+                break;
+            case PreyLocation.womb:
+                part = genRandom(wombSyn);
+                break;
+            case PreyLocation.anal:
+                part = genRandom(analSyn);
+                break;
+            case PreyLocation.tail:
+                part = "tail";
+                break;
+            default:
+                part = "";
+                break;
+        }
+        if (part.EndsWith("s"))
+            return part + " are";
+        else
+            return part + " is";
+    }
+
+    /// <summary>
+    /// Gets a random synonym for mouth.
+    /// </summary>
+    public static string ToMouthSyn()
+    {
+        return genRandom(mouthSyn);
     }
 
     /// <summary>
@@ -135,6 +215,14 @@ public static class PreyLocStrings
     public static string ToBreastSynPlural()
     {
         return genRandom(breastSynPlural);
+    }
+
+    /// <summary>
+    /// Gets a random singular synonym for breasts.
+    /// </summary>
+    public static string ToBreastSynSing()
+    {
+        return genRandom(breastSynSing);
     }
 
     /// <summary>

@@ -793,5 +793,194 @@ static class LogUtilities
         else if (weapon.Name == "Claw") return "Claws";
         return weapon.Name;
     }
+
+    public static string RaceArticleSingular(Race race)
+    {
+        switch (race)
+        {
+            case Race.Cats:
+                return "a cat";
+            case Race.Dogs:
+                return "a dog";
+            case Race.Foxes:
+                return "a fox";
+            case Race.Wolves:
+                return "a wolf";
+            case Race.Bunnies:
+                return "a bunny";
+            case Race.Lizards:
+                return "a lizard";
+            case Race.Slimes:
+                return "a slime";
+            case Race.Scylla:
+                return "a scylla";
+            case Race.Harpies:
+                return "a harpy";
+            case Race.Imps:
+                return "an imp";
+            case Race.Humans:
+                return "a human";
+            case Race.Crypters:
+                return "a crypter";
+            case Race.Lamia:
+                return "a lamia";
+            case Race.Kangaroos:
+                return "a kangaroo";
+            case Race.Taurus:
+                return "a cow";
+            case Race.Crux:
+                return "a crux";
+            case Race.Equines:
+                return "an equine";
+            case Race.Sergal:
+                return "a sergal";
+            case Race.Bees:
+                return "a bee";
+            case Race.Driders:
+                return "a drider";
+            case Race.Alraune:
+                return "an alraune";
+            case Race.Bats:
+                return "a bat";
+            case Race.Panthers:
+                return "a panther";
+            case Race.Merfolk:
+                return "a merfolk";
+            case Race.Avians:
+                return "an avian";
+            case Race.Ants:
+                return "an ant";
+            case Race.Frogs:
+                return "a frog";
+            case Race.Sharks:
+                return "a shark";
+            case Race.Deer:
+                return "a deer";
+            case Race.Succubi:
+                return "a concubus";
+            case Race.Tigers:
+                return "a tiger";
+            case Race.Goblins:
+                return "a goblin";
+            case Race.Alligators:
+                return "an alligator";
+            case Race.Puca:
+                return "a puca";
+            case Race.Kobolds:
+                return "a kobold";
+            case Race.DewSprites:
+                return "a dew sprite";
+            case Race.Hippos:
+                return "a hippo";
+            case Race.Vipers:
+                return "a viper";
+            case Race.Komodos:
+                return "a komodo";
+            case Race.Cockatrice:
+                return "a cockatrice";
+            case Race.Vargul:
+                return "a vargul";
+            case Race.Youko:
+                return "a youko";
+            case Race.Vagrants:
+                return "a vagrant";
+            case Race.Serpents:
+                return "a serpent";
+            case Race.Wyvern:
+                return "a wyvern";
+            case Race.YoungWyvern:
+                return "a young wyvern";
+            case Race.Compy:
+                return "a compy";
+            case Race.FeralSharks:
+                return "a shark";
+            case Race.FeralWolves:
+                return "a feral wolf";
+            case Race.DarkSwallower:
+                return "a dark swallower";
+            case Race.Cake:
+                return "a cake";
+            case Race.Harvesters:
+                return "a harvester";
+            case Race.Collectors:
+                return "a collector";
+            case Race.Voilin:
+                return "a voilin";
+            case Race.FeralBats:
+                return "a bat";
+            case Race.FeralFrogs:
+                return "a feral frog";
+            case Race.Dragon:
+                return "a dragon";
+            case Race.Dragonfly:
+                return "a dragonfly";
+            case Race.TwistedVines:
+                return "a plant";
+            case Race.Fairies:
+                return "a fairy";
+            case Race.FeralAnts:
+                return "an ant";
+            case Race.Gryphons:
+                return "a gryphon";
+            case Race.SpitterSlugs:
+                return "a spitter slug";
+            case Race.SpringSlugs:
+                return "a spring slug";
+            case Race.RockSlugs:
+                return "a rock slug";
+            case Race.CoralSlugs:
+                return "a coral slug";
+            case Race.Salamanders:
+                return "a salamander";
+            case Race.Mantis:
+                return "a mantis";
+            case Race.EasternDragon:
+                return "an eastern dragon";
+            case Race.Catfish:
+                return "a catfish";
+            case Race.Raptor:
+                return "a raptor";
+            case Race.WarriorAnts:
+                return "a warrior ant";
+            case Race.Gazelle:
+                return "a gazelle";
+            case Race.Earthworms:
+                return "an earthworm";
+            case Race.FeralLizards:
+                return "a feral lizard";
+            case Race.Monitors:
+                return "a monitor";
+            case Race.Schiwardez:
+                return "a schiwardez";
+            case Race.Terrorbird:
+                return "a terrorbird";
+            case Race.Dratopyr:
+                return "a dratopyr";
+            case Race.FeralLions:
+                return "a lion";
+            case Race.Goodra:
+                return "a Goodra";
+            case Race.Whisp:
+                return "a whisp";
+            case Race.FeralHorses:
+                return "a horse";
+            case Race.DRACO:
+                return "a D.R.A.C.O";
+            case Race.Vision:
+                return "a vision";
+            case Race.Abakhanskya:
+                return "a khatunlao";
+            case Race.none:
+                return "uhhh";
+        }
+        return race.ToString(); //Updated this so a new race will return the race's name, instead of nothing
+    }
+    internal static Unit GetRandomAlly(Unit unit, Unit target, Unit prey = null, Unit add = null)
+    {
+        Actor_Unit[] validAllies = TacticalUtilities.Units.Where(a => a.Unit.Side == target.Side && !a.Unit.IsDead && a.Unit != unit && a.Unit != target && a.Unit != prey && a.Unit != add).ToArray();
+        if (validAllies.Length < 1)
+            return null;
+        return validAllies[State.Rand.Next(0, validAllies.Length - 1)].Unit;
+    }
 }
 

@@ -236,7 +236,7 @@ static class StoredLogTexts
     /// </returns>
     public static bool InBalls(EventLog s)
     {
-        return s.preyLocation == PreyLocation.breasts || s.preyLocation == PreyLocation.leftBreast || s.preyLocation == PreyLocation.rightBreast;
+        return s.preyLocation == PreyLocation.balls;
     }
 
     /// <summary>
@@ -632,6 +632,11 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Unit.Name}</b> slurps up <b>{i.Target.Name}</b> and sighs after the serpentine dragon curls up in {GPPHis(i.Unit)} stomach.",
             targetRace: Race.EasternDragon, priority: 9),
 
+            new EventString((i) => $"As <b>{i.Unit.Name}</b> approaches <b>{i.Target.Name}</b>, the {GetRaceDescSingl(i.Target)}, seeing no mouth or other openings, thinks {GPPHimself(i.Target)} safe. Suddenly, <b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b> head opens up, and as <b>{i.Target.Name}</b> is rapidly swallowed down, {GPPHe(i.Target)} take{SIfSingular(i.Target)} a moment to think on what went wrong.",
+            actorRace: Race.Aabayx, priority: 9),
+            new EventString((i) => $"As <b>{i.Target.Name}</b> is swallowed down by a fellow Aabayx, all present are forced to marvel at the geometric impossibility on display before them, as <b>{i.Unit.Name}</b> somehow fits <b>{i.Target.Name}</b>'s icosahedral head through {GPPHis(i.Unit)} own icosahedral head.",
+            actorRace: Race.Aabayx, targetRace: Race.Aabayx, priority: 10),
+
             new EventString((i) => $"<b>{i.Target.Name}</b> lets out a distressed yelp as {GPPHeIs(i.Target)} shoved headfirst into <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> mouth!",
             priority: 8),
             new EventString((i) => $"<b>{i.Unit.Name}</b> grabs <b>{i.Target.Name}</b> and hungrily swallows {GPPHim(i.Target)} whole!",
@@ -908,7 +913,7 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Target.Name}</b> explains that this isn’t how it’s supposed to work. <b>{i.Unit.Name}</b> stretches and purrs.",
             actorRace: Race.Cats, targetRace: Race.Dogs, priority: 8),
             new EventString((i) => $"<b>{i.Target.Name}</b> scratches the stomach walls. <b>{i.Unit.Name}</b> begins thumping {GPPHis(i.Unit)} leg.",
-            actorRace: Race.Dogs, targetRace: Race.Cats, priority: 8),
+            actorRace: Race.Dogs, targetRace: Race.Cats, conditional: InStomach, priority: 8),
 
             new EventString((i) => $"<b>{i.Unit.Name}</b> cries aloud as {GPPHis(i.Unit)} {i.preyLocation.ToSyn()} angrily rumble{PluralForPart(i.preyLocation)} as it digests its first large meal.",
             priority: 8, conditional: FirstTime),
@@ -950,6 +955,11 @@ static class StoredLogTexts
             priority: 9, actorRace: Race.Cierihaka),
             new EventString((i) => $"The digestive fluids closing in, <b>{i.Target.Name}</b> has to accept that {GPPHis(i.Target)} time will come to an end within a greedy <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()}.",
             priority: 9, actorRace: Race.Cierihaka),
+
+            new EventString((i) => $"The unique viral digestion of the Aabayx is taking a toll on <b>{i.Target.Name}</b>, as viruses progressively infect more of {GPPHis(i.Target)} body.",
+            priority: 9, actorRace: Race.Aabayx),
+            new EventString((i) => $"The chemical signals used by <b>{i.Unit.Name}</b>'s stomach are tricking the viral matrix that forms <b>{i.Target.Name}</b>'s body to willingly disassemble.",
+            priority: 10, actorRace: Race.Aabayx, targetRace: Race.Aabayx),
 
 
             new EventString((i) => $"<b>{i.Target.Name}</b> is humiliated by being consumed by a first timer.",
@@ -1124,7 +1134,7 @@ static class StoredLogTexts
             priority: 8),
             new EventString((i) => $"Not to be defeated so easily, <b>{i.Target.Name}</b> struggles with all {GPPHis(i.Target)} might.",
             priority: 8),
-            new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} quiver{PluralForPart(i.preyLocation)} and shake{PluralForPart(i.preyLocation)}, as <b>{i.Target.Name}</b> tries to make {GPPHim(i.Unit)} {i.preyLocation.ToVerb()} {GPPHim(i.Target)} out.",
+            new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {PreyLocStrings.SynAndPluralForm(i.preyLocation, "quiver", "and shake")}, as <b>{i.Target.Name}</b> tries to make {GPPHim(i.Unit)} {i.preyLocation.ToVerb()} {GPPHim(i.Target)} out.",
             priority: 8),
             new EventString((i) => $"<b>{i.Target.Name}</b> shuffles inside <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()}.",
             priority: 8),
@@ -1133,19 +1143,19 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Target.Name}</b> squirms and cries for help within <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()}.",
             priority: 8),
             //"They" for balls/breasts - "It" for belly/womb, also rumble/rumbles
-            //new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} rumble{PluralForPart(i.preyLocation)} as it greets fresh prey, eager for more.",
+            //new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {PreyLocStrings.SynAndPluralForm(i.preyLocation, "rumble")} as it greets fresh prey, eager for more.",
             //priority: 8),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} loudly churn{PluralForPart(i.preyLocation)}, getting started on digesting <b>{i.Target.Name}</b>.",
             priority: 8),
             new EventString((i) => $"<b>{i.Unit.Name}</b> groans quietly when {GPPHis(i.Unit)} {i.preyLocation.ToSyn()} lets out a mild gurgle of indigestion, with <b>{i.Target.Name}</b> yet to settle in.",
             priority: 8, conditional: InStomach),
-            new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} wobble{PluralForPart(i.preyLocation)} vigorously as <b>{i.Target.Name}</b> is trying to escape.",
+            new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {PreyLocStrings.SynAndPluralForm(i.preyLocation, "wobble")} vigorously as <b>{i.Target.Name}</b> tries to escape.",
             priority: 8),
             new EventString((i) => $"<b>{i.Target.Name}</b> starts feeling dizzy inside <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()}.",
             priority: 8),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b> struggles are weakening somewhat.",
             priority: 8),
-            new EventString((i) => $"<b>{i.Target.Name}</b> might not see the light of day again if <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} continues to be left in charge of {GPPHim(i.Target)}.",
+            new EventString((i) => $"<b>{i.Target.Name}</b> might not see the light of day again if <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {PreyLocStrings.SynAndPluralForm(i.preyLocation, "continue")} to be left in charge of {GPPHim(i.Target)}.",
             priority: 8),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} contract{PluralForPart(i.preyLocation)} around <b>{i.Target.Name}</b>, steadily digesting {GPPHis(i.Unit)} meal.",
             priority: 8),
@@ -1165,7 +1175,7 @@ static class StoredLogTexts
             priority: 8),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} let{PluralForPart(i.preyLocation)} out a satisfied gurgle as it works.",
             priority: 8, conditional: (s) => InStomach(s) && CanBurp()),
-            new EventString((i) => $"<b>{i.Unit.Name}</b> moans softly while {GPPHis(i.Unit)} stuffed {i.preyLocation.ToSyn()} rumble{PluralForPart(i.preyLocation)} ominously.",
+            new EventString((i) => $"<b>{i.Unit.Name}</b> moans softly while {GPPHis(i.Unit)} stuffed {PreyLocStrings.SynAndPluralForm(i.preyLocation, "rumble")} ominously.",
             priority: 8),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> knees buckle for a moment as <b>{i.Target.Name}</b> struggles.",
             priority: 8),
@@ -1176,12 +1186,14 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Unit.Name}</b> tells <b>{i.Target.Name}</b> that {GPPHe(i.Unit)} didn’t want this. <b>{i.Target.Name}</b> is not consoled.",
             priority: 8),
             new EventString((i) => $"<b>{i.Target.Name}</b> holds out hope, knowing that {GPPHis(i.Target)} fellow warriors will free {GPPHim(i.Target)} soon.",
-            priority: 8),
+            priority: 8, conditional: s => TacticalUtilities.Units.Where(a => a.Unit.Side == s.Target.Side && a.Unit != s.Target).Count() >= 1),
+            new EventString((i) => $"<b>{i.Target.Name}</b> desperately struggles inside <b>{i.Unit.Name}</b>, knowing that nobody is coming to save {GPPHim(i.Target)}.",
+            priority: 8, conditional: s => TacticalUtilities.Units.Where(a => a.Unit.Side == s.Target.Side && a.Unit != s.Target).Count() >= 1),
             new EventString((i) => $"<b>{i.Target.Name}</b> offers <b>{i.Unit.Name}</b> a bribe. <b>{i.Unit.Name}</b> considers it for a moment but politely declines.",
             priority: 8),
             new EventString((i) => $"<b>{i.Unit.Name}</b> asks <b>{i.Target.Name}</b> if {GPPHeIsAbbr(i.Unit)} eaten {GPPHim(i.Target)} before. <b>{i.Target.Name}</b> says {GPPHe(i.Unit)} do{EsIfSingular(i.Unit)}n’t think so.",
             priority: 8, conditional: (s) => s.Target.HasTrait(Traits.Eternal)),
-            new EventString((i) => $"<b>{i.Target.Name}</b> promises that {GPPHe(i.Target)} will eat <b>{i.Unit.Name}</b> once {GPPHe(i.Target)} escapes. <b>{i.Unit.Name}</b> laughs and pats {GPPHis(i.Unit)} belly.",
+            new EventString((i) => $"<b>{i.Target.Name}</b> promises that {GPPHe(i.Target)} will eat <b>{i.Unit.Name}</b> once {GPPHe(i.Target)} escapes. <b>{i.Unit.Name}</b> laughs and pats {GPPHis(i.Unit)} {i.preyLocation.ToSyn()}.",
             priority: 8),
             new EventString((i) => $"<b>{i.Unit.Name}</b> winces in pain as <b>{i.Target.Name}</b> tries to claw {GPPHis(i.Target)} way out.",
             priority: 8),
@@ -1207,7 +1219,7 @@ static class StoredLogTexts
             priority: 8),
             new EventString((i) => $"<b>{i.Unit.Name}</b> moans as <b>{i.Target.Name}</b> massages {GPPHim(i.Unit)} with {GPPHis(i.Target)} struggles.",
             priority: 8),
-            new EventString((i) => $"<b>{i.Unit.Name}</b> tells <b>{i.Target.Name}</b> to be thankful as {GPPHis(i.Unit)} {i.preyLocation.ToSyn()} {IsAre(i.Unit)} far more gentle than {GPPHis(i.Unit)} friends.",
+            new EventString((i) => $"<b>{i.Unit.Name}</b> tells <b>{i.Target.Name}</b> to be thankful as {GPPHis(i.Unit)} {PreyLocStrings.PartIsAre(i.preyLocation)} far more gentle than {GPPHis(i.Unit)} friends'.",
             priority: 8),
             new EventString((i) => $"<b>{i.Target.Name}</b> kicks at the walls of the {i.preyLocation.ToSyn()} confining {GPPHim(i.Target)}, sending ripples of pleasure across <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> body.",
             priority: 8),
@@ -1412,6 +1424,12 @@ static class StoredLogTexts
 
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> pleasured murrls harmonize with {GPPHis(i.Unit)} busy gut's groaning as it strives to break down <b>{i.Target.Name}</b>.",
             priority: 9, conditional: InStomach, actorRace: Race.FeralLions),
+
+            new EventString((i) => $"\"You know, I wasn't actually certain if my pouch would be able to hold you. You looked pretty big,\" <b>{i.Unit.Name}</b> says to <b>{i.Target.Name}</b>. \"You won't be very big much longer, though...\"",
+            priority: 9, conditional: InBreasts, actorRace: Race.Kangaroos, targetRace: Race.Taurus),
+
+            new EventString((i) => $"With a sudden look on {GPPHis(i.Unit)} face, <b>{i.Unit.Name}</b> looks down and asks \"Hey, while I've got you in my pouch, can you tell me why so many races look like you guys? Like, what's up with that?\"",
+            priority: 9, conditional: InBreasts, actorRace: Race.Kangaroos, targetRace: Race.Humans) // Maybe limit this to fourth-wall breaking?
         };
 
 
@@ -1920,7 +1938,7 @@ static class StoredLogTexts
             priority: 16, conditional: s => s.Target != s.Unit ,targetRace: Race.FeralLions, actorRace: Race.FeralLions),
 
             // Merged original 1.5 line(s) into one entry that now handles self vs. ally rubbing
-            new EventString((i) =>$"<b>{i.Unit.Name}</b> massages {(i.Unit == i.Target ? $"{GPPHis(i.Target)} own" : $"<b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b>")} full scrotum{GetRandomStringFrom(".",$", a bit of pre leaking out of {(i.Unit == i.Target ? GPPHis(i.Target) : "<b>" + i.Target.Name + "</b>'s")} erect {PreyLocStrings.ToCockSyn()}.")}.", priority: 8),
+            new EventString((i) =>$"<b>{i.Unit.Name}</b> massages {(i.Unit == i.Target ? $"{GPPHis(i.Target)} own" : $"<b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b>")} full scrotum{GetRandomStringFrom(".",$", a bit of pre leaking out of {(i.Unit == i.Target ? GPPHis(i.Target) : "<b>" + i.Target.Name + "</b>'s")} erect {PreyLocStrings.ToCockSyn()}.")}", priority: 8),
             // New lines (Thanks Cartography! :thumbsup:)
             new EventString((i) =>$"<b>{i.Unit.Name}</b> fondles {(i.Unit == i.Target ? $"{GPPHis(i.Target)} own" : $"<b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b>")} squirming {PreyLocStrings.ToSyn(PreyLocation.balls)}, feeling <b>{i.Prey.Name}</b> within.", priority: 8),
             new EventString((i) =>$"<b>{i.Target.Name}</b> {(i.Unit == i.Target ? $"feels {GPPHis(i.Target)} own" : $"has <b>{i.Unit.Name}</b> feel {GPPHis(i.Target)}")} {PreyLocStrings.ToSyn(PreyLocation.balls)}, soaking poor <b>{i.Prey.Name}</b> within further.", priority: 8),
@@ -2352,7 +2370,7 @@ static class StoredLogTexts
             priority: 9, conditional: s=> HardVore() && InStomach(s) && ActorHumanoid(s)),
             //Humanoid pred
             new EventString((i) => $"\"Shh, it’s okay. You’re right where you belong,\" <b>{i.Unit.Name}</b> says soothingly while stroking {GPPHis(i.Unit)} belly. <b>{i.Target.Name}</b>, too weak to fight by this point, gives in to the loving words and dies with a final tummy wobble.",
-            priority: 9, conditional: ActorHumanoid),
+            priority: 9, conditional: s => ActorHumanoid(s) && InStomachOrWomb(s)),
             new EventString((i) => $"<b>{i.Unit.Name}</b> tries to draw out the process of digesting {GPPHis(i.Unit)} wiggling prey a little longer, but {GPPHis(i.Unit)} voracious {i.preyLocation.ToSyn()} overcome{PluralForPart(i.preyLocation)} the living meal before {GPPHe(i.Target)} can stop it.",
             priority: 9, conditional: ActorHumanoid),
             new EventString((i) => $"<b>{i.Unit.Name}</b> grows tired of {GPPHis(i.Unit)} meal’s incessant struggling and decides to stop playing with {GPPHis(i.Unit)} food. <b>{i.Target.Name}</b> doesn’t stand a chance as the well trained {i.preyLocation.ToSyn()} begin{PluralForPart(i.preyLocation)} to convulse and fill with juices as the charade ends.",
@@ -2420,6 +2438,12 @@ static class StoredLogTexts
             actorRace: Race.Panthers, priority: 9, conditional: InBalls),
             new EventString((i) => $"{i.Unit.Name}</b> can’t help but rub {GPPHis(i.Unit)} nipples and curse with delight as <b>{i.Target.Name}</b> attempts a final desperate plan of escape. It does naught but excite the panting panther into orgasm.",
             actorRace: Race.Panthers, priority: 9, conditional: InBreasts),
+
+            // Aabayx pred
+            new EventString((i) => $"With one final shudder, <b>{i.Target.Name}</b> loses any structural integrity, dissolving into trillions of new viruses, ready for integration into <b>{i.Unit.Name}</b>'s body.",
+            actorRace: Race.Aabayx, priority: 9),
+            new EventString((i) => $"At this point, <b>{i.Target.Name}</b> is beyond saving. While clumps of the viral matrix that made up {GPPHis(i.Target)} body still cling together, <b>{i.Target.Name}</b>'s disassembly has passed a point of no return. {Capitalize(GPPHe(i.Target))} {IsAre(i.Target)} dead.",
+            actorRace: Race.Aabayx, targetRace: Race.Aabayx, priority: 10),
 
             //Kangaroo pred (pouch vore)
             new EventString((i) => $"With no fanfare or ceremony, <b>{i.Unit.Name}</b>'s pouch stops moving, signaling <b>{i.Target.Name}</b>'s death within.", actorRace: Race.Kangaroos, priority: 10),
@@ -2616,7 +2640,7 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Unit.Name}</b> enjoys kneading {GPPHis(i.Unit)} {i.preyLocation.ToSyn()} with its added heft from <b>{i.Target.Name}</b>, but wishes <b>{PotentialNextPrey(i.Unit).Name}</b> would add to it even more", priority: 8, conditional: s=> WeightGain(s) && (CanAddressPlayer(s) || PotentialNextPrey(s.Unit).Name != "You, the player" )),
 
             //stomach-exclusive
-            new EventString((i) => $"With <b>{i.Target.Name}</b> all sucked up by <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> intestines, {GPPHe(i.Unit)} immediately misses the sloshy feeling and looks around for {GPPHis(i.Unit)} next meal", priority: 9, conditional: InStomach),
+            new EventString((i) => $"With <b>{i.Target.Name}</b> all sucked up by <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> intestines, {GPPHe(i.Unit)} immediately misses the sloshy feeling and looks around for {GPPHis(i.Unit)} next meal.", priority: 9, conditional: InStomach),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> stomach flattens, having absorbed the last of <b>{i.Target.Name}</b>.", priority: 9, conditional: InStomach),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> stomach flattens, having absorbed the last of - what was {GPPHis(i.Target)} name, again?", priority: 9, conditional: InStomach),
             new EventString((i) => $"Gurgling gives way to silence, as last bits of <b>{i.Target.Name}</b> find themselves a better purpose - to provide <b>{i.Unit.Name}</b> with nutrients.", priority: 9, conditional: InStomach),
@@ -2655,6 +2679,7 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Unit.Name}</b> thinks <b>{i.Target.Name}</b> looks better as this neat arrangement of {GetRaceDescSingl(i.Unit)} turds", priority: 9, conditional: s => ScatPossible(s)),
             new EventString((i) => $"After a bit of a messy dump, <b>{i.Unit.Name}</b> wonders which turd could be that {InfoPanel.RaceSingular(i.Target)} leader, but can't quite tell.", priority: 9, conditional: s => ScatPossible(s) && TargetLeader(s)),
             new EventString((i) => $"The friction from <b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b> remains sliding past {GPPHis(i.Unit)} anal sphincter sends arousing tingles through <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> body.", priority: 9, conditional: s => ScatPossible(s) && Lewd()),
+
             //Fart disposal
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> sphincter blows <b>{i.Target.Name}</b> a smelly requiem. Looks like {GPPHis(i.Unit)} innards are done with their prey.", priority: 9, conditional: s => Farts() && InStomach(s)),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> rump is eager to announce that <b>{i.Target.Name}</b> is completely used up, and has a loud, satisfying fart to show for it.", priority: 9, conditional: s => Farts() && InStomach(s)),
@@ -2663,21 +2688,33 @@ static class StoredLogTexts
             new EventString((i) => $"<b>{i.Unit.Name}</b> passes gas – <b>{i.Target.Name}</b> passes on to the next life.", priority: 9, conditional: s => Farts() && !ScatPossible(s) && InStomach(s)),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> ass vibrates loudly as it releases <b>{i.Target.Name}</b> as a gust of stink.", priority: 9, conditional: s => Farts() && !ScatPossible(s) && InStomach(s)),
             new EventString((i) => $"<b>{i.Target.Name}</b> has become nothing but an obscene melody under <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> tail", priority: 9, conditional: s => Farts() && !ScatPossible(s) && ActorTail(s) && InStomach(s)),
+
             //CV disposal
             new EventString((i) => $"<b>{i.Unit.Name}</b> sways {GPPHis(i.Unit)} hips side to side as what is left of <b>{i.Target.Name}</b> gushes from {GPPHis(i.Unit)} {PreyLocStrings.ToCockSyn()} onto the ground.", priority: 9, conditional: s => ActorHumanoid(s) && InBalls(s)),
             new EventString((i) => $"Not being able to hold anymore, <b>{i.Unit.Name}</b> orgasms, {GPPHis(i.Unit)} {PreyLocStrings.ToCockSyn()} expelling in spurts what once was <b>{i.Target.Name}</b>.", priority: 9, conditional: InBalls),
-            new EventString((i) => $"With nothing to absorb anymore, <b>{i.Unit.Name}</b> cums out the puddle of <b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b> remains.", priority: 9, conditional: InBalls),
+            new EventString((i) => $"With nothing to absorb anymore, <b>{i.Unit.Name}</b> cums out the puddle of <b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b> remains.", priority: 9, conditional: s => InBalls(s) && !Config.CondomsForCV),
             new EventString((i) => $"<b>{i.Unit.Name}</b> demonstrates {GPPHis(i.Unit)} virility to <b>{AttractedWarrior(i.Unit)}</b> by splattering <b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b> remains across the ground in an impressive puddle.", priority: 9, conditional: s=> InBalls(s) && ReqOSWLewd(s)),
 
             new EventString((i) => $"With a monstrous roar, <b>{i.Unit.Name}</b> ejaculates, {GPPHis(i.Unit)} cock spurting out the remains of <b>{i.Target.Name}</b> in thick globs.",
             actorRace: Race.Dragon, priority: 9, conditional: InBalls),
 
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> dick spurts out the remains of <b>{i.Target.Name}</b>. Then {GPPHe(i.Unit)} proudly gazes at the puddle {GPPHis(i.Unit)} former servant made.",
-            actorRace: Race.Dragon, targetRace: Race.Kobolds, priority: 9, conditional: s => InBalls(s) && Friendly(s)),
+            actorRace: Race.Dragon, targetRace: Race.Kobolds, priority: 9, conditional: s => InBalls(s) && Friendly(s) && !Config.CondomsForCV),
 
-            new EventString((i) => $"\"Attention {GetRaceDescSingl(i.Target)}, this is what has become of your 'mighty' leader,\" <b>{i.Unit.Name}</b> taunts as {GPPHe(i.Unit)} jerk{SIfSingular(i.Unit)} {GPPHimself(i.Unit)} to orgasm, splattering the remains of <b>{i.Target.Name}</b> all over the ground in an impressive puddle.",
+            new EventString((i) => $"\"Attention {GetRaceDescSingl(i.Target)}, this is what has become of your 'mighty' leader,\" <b>{i.Unit.Name}</b> taunts as {GPPHe(i.Unit)} jerk{SIfSingular(i.Unit)} {GPPHimself(i.Unit)} to orgasm, splattering the remains of <b>{i.Target.Name}</b> {(Config.CondomsForCV ? $"into a condom, promptly tying it and tossing it aside." : "all over the ground in an impressive puddle.")}",
             priority: 9, conditional: s => ActorLeader(s) && InBalls(s) && TargetLeader(s)),
-            
+
+            new EventString((i) => $"As what little is left of <b>{i.Target.Name}</b> is pumped out <b>{i.Unit.Name}</b>'s of {PreyLocStrings.ToCockSyn()}, {GetRandomStringFrom($"{GPPHis(i.Target)}", $"the {GetRaceDescSingl(i.Target)}'s")} remains are captured within the semi-translucent rubber of a condom.", priority: 9, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+            new EventString((i) => $"Feeling that <b>{i.Target.Name}</b>'s digestion is complete, <b>{i.Unit.Name}</b> slips a condom over {GPPHis(i.Unit)} {PreyLocStrings.ToCockSyn()}, into which {GetRandomStringFrom($"{GPPHe(i.Unit)}", $"the {GetRaceDescSingl(i.Target)}")} promptly pumps <b>{i.Target.Name}</b>.", priority: 9, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+            new EventString((i) => $"After emptying {GPPHis(i.Unit)} {PreyLocStrings.ToBallSynPlural()} into a condom, <b>{i.Unit.Name}</b> observes {GPPHis(i.Unit)} handiwork. \"Between a {GetRaceDescSingl(i.Target)} and a condom filled with {GetRaceDescSingl(i.Unit)} {PreyLocStrings.ToFluid(PreyLocation.balls)}, I gotta say, you look better in your new form.\"", priority: 9, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+            new EventString((i) => $"After emptying {GPPHis(i.Unit)} {PreyLocStrings.ToBallSynPlural()} into a condom, <b>{i.Unit.Name}</b> observes {GPPHis(i.Unit)} handiwork. \"And with that, your makeover into my {PreyLocStrings.ToFluid(PreyLocation.balls)} is complete.\"", priority: 9, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+            new EventString((i) => $"As <b>{i.Unit.Name}</b> feels {GPPHis(i.Unit)} balls contract, {GPPHe(i.Unit)} barely {HasHave(i.Unit)} time to get the condom over {GPPHis(i.Unit)} {PreyLocStrings.ToCockSyn()} before <b>{i.Target.Name}</b> explodes out into the contraceptive.", priority: 9, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+            new EventString((i) => $"With no fanfare, <b>{i.Unit.Name}</b> fills a condom with what little remains of <b>{i.Target.Name}</b>.{GetRandomStringFrom("", $"As {GetRandomStringFrom($"{GPPHe(i.Unit)} tie{SIfSingular(i.Unit)}", $"the {GetRaceDescSingl(i.Unit)} ties")} off the condom, {GPPHe(i.Unit)} silently whisper{SIfSingular(i.Unit)}, \"You'll make a good trophy.\"", $"As {GetRandomStringFrom($"{GPPHe(i.Unit)} tie{SIfSingular(i.Unit)}", $"the {GetRaceDescSingl(i.Unit)} ties")} off the condom, {GPPHe(i.Unit)} silently whisper{SIfSingular(i.Unit)}, \"Please don't pop on me. I do not need the mess from that.\"", $"As {GetRandomStringFrom($"{GPPHe(i.Unit)} tie{SIfSingular(i.Unit)}", $"the {GetRaceDescSingl(i.Unit)} ties")} off the condom, {GPPHe(i.Unit)} silently whisper{SIfSingular(i.Unit)}, \"Please don't pop on me. I want you as a trophy.\"")}", priority: 9, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+
+            new EventString((i) => $"After emptying {GPPHis(i.Unit)} {PreyLocStrings.ToBallSynPlural()} into a condom, <b>{i.Unit.Name}</b> observes {GPPHis(i.Unit)} handiwork. \"Between a Slime and a condom filled with {GetRaceDescSingl(i.Unit)} {PreyLocStrings.ToFluid(PreyLocation.balls)}, I gotta say, I can't really tell a difference.\"", priority: 9, targetRace: Race.Slimes, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+            new EventString((i) => $"After emptying a former Slime from {GPPHis(i.Unit)} {PreyLocStrings.ToBallSynPlural()} into a condom, <b>{i.Unit.Name}</b> observes {GPPHis(i.Unit)} handiwork. \"Huh. If I didn't know better, I'd almost wonder if you actually got digested at all.\"", priority: 9,targetRace: Race.Slimes,  conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+            new EventString((i) => $"With no fanfare, <b>{i.Unit.Name}</b> fills a condom with what little remains of <b>{i.Target.Name}</b>. As {GetRandomStringFrom($"{GPPHe(i.Unit)} tie{SIfSingular(i.Unit)}", $"the {GetRaceDescSingl(i.Unit)} ties")} off the condom, {GPPHe(i.Unit)} silently whisper{SIfSingular(i.Unit)}, \"{GetRandomStringFrom($"You don't look to have changed one bit, you stupid Slime.", $"Would you look at that? You're still a Slime after all.")}\"", priority: 9, targetRace: Race.Slimes, conditional: s => ActorHumanoid(s) && InBalls(s) && Config.CondomsForCV),
+
             //BV disposal
             new EventString((i) => $"<b>{i.Unit.Name}</b> leans forward and moans, letting what's left of <b>{i.Target.Name}</b> pour out of {GPPHis(i.Unit)} nipples onto the ground.", priority: 9, conditional: InBreasts),
             new EventString((i) => $"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> breasts finally settle, the streams of milk pouring from them being only remnant of what happened to <b>{i.Target.Name}</b>.", priority: 9, conditional: InBreasts),
@@ -2702,7 +2739,7 @@ static class StoredLogTexts
             //new EventString((i) => $"<b>{i.Unit.Name}</b> slowly pulls open {GPPHis(i.Unit)} pouch, finding nothing inside at all. <b>{i.Unit.Name}</b> then refoccuses {GPPHis(i.Unit)} attention on the {battlefield/battle<only used if non-surrendered enemies still remain on the field>}, rapidly forgetting that <b>{i.Target.Name}</b> had ever exsisted.", actorRace: Race.Kangaroos, priority: 10),
             new EventString((i) => $"<b>{i.Unit.Name}</b> slowly pulls open {GPPHis(i.Unit)} pouch, finding nothing inside at all. Wait, was that a handprint, pushing outward from the inside lining of the pouch? It's frankly too dark to tell, and even more frankly, <b>{i.Unit.Name}</b> doesn't care.", actorRace: Race.Kangaroos, priority: 10),
             new EventString((i) => $"<b>{i.Unit.Name}</b> slowly pulls open {GPPHis(i.Unit)} pouch, finding nothing inside at all, save a pile of crumpled clothes. <b>{i.Unit.Name}</b> pulls them out, and examines them for a moment, before saying \"wrong size,\" and casually tosses them over {GPPHis(i.Unit)} shoulder.", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"<b>{i.Unit.Name}</b>'s pouch unseals, ready to hold more{GetRandomStringFrom(" occupants", " (temporary) occupants", " \"occupants\"")}.", actorRace: Race.Kangaroos, priority: 10),
+            new EventString((i) => $"<b>{i.Unit.Name}</b>'s pouch unseals, ready to hold more {GetRandomStringFrom("occupants", "(temporary) occupants", "\"occupants\"")}.", actorRace: Race.Kangaroos, priority: 10),
             new EventString((i) => $"<b>{i.Unit.Name}</b>'s pouch has shrunk back down to normal size and shape, with no evidence that a {GetRaceDescSingl(i.Target)} had ever been inside.", actorRace: Race.Kangaroos, priority: 10),
             new EventString((i) => $"With <b>{i.Target.Name}</b> fully absorbed, <b>{i.Unit.Name}</b>'s pouch unseals, revealing not one hint as to what happened to its previous {GetRandomStringFrom("occupant", "tenant")}.", actorRace: Race.Kangaroos, priority: 10),
 
@@ -2762,7 +2799,26 @@ static class StoredLogTexts
             //Aba Lewd
             new EventString((i) => $"Abakhanskya grins and rumbles with content as her tits drizzle their rich product. <b>{i.Target.Name}</b>'s harvesting was the catalyst for this bounty.",
             actorRace: Race.Abakhanskya, priority: 9, conditional: s => Lewd()),
-            
+
+            new EventString((i) => $"With a {GetRandomStringFrom("lewd", "gross", "odd")} squelching noise, the non-cellular remains of <b>{i.Target.Name}</b> fall from <b>{i.Unit.Name}'s</b>'s {GetRandomStringFrom("anus", "ass", "asshole", "behind")} in a spongy pile.",
+            actorRace: Race.Aabayx, priority: 9), // Maybe require scat for this one and draft up a line for those with scat disabled?
+            new EventString((i) => $"The last viruses from <b>{i.Target.Name}</b> have been integrated into <b>{i.Unit.Name}</b>'s viral matrix. A small *glorp* as the last bit is sucked up into <b>{i.Unit.Name}'s</b> is <b>{i.Target.Name}</b>'s legacy.",
+            actorRace: Race.Aabayx, targetRace: Race.Aabayx, priority: 10),
+
+            // I have no idea how to detect whether a unit's AI is attempting to retreat, will return to this
+            /*
+            new EventString((i) => $"In {GPPHis(i.Unit)} hurry to get away, <b>{i.Unit.Name}</b> almost doesn't even notice the -ahem- \"land mine\" that {GPPHis(i.Unit)} body converted <b>{i.Target.Name}</b> into.",
+            priority: 10), // This one too probably
+            new EventString((i) => $"As <b>{i.Unit.Name}</b> hurries away, the last drops of \"<b>{i.Target.Name}</b>\" drip from {GPPHis(i.Unit)} {GetRandomStringFrom("vagina", "slit", "muff")} without the predator's noticing.",
+            priority: 10),
+            new EventString((i) => $"The bouncing up and down from <b>{i.Unit.Name}</b>'s attempt to escape the battlefield forces the last of <b>{i.Target.Name}</b> out of <b>{i.Unit.Name}</b>'s {PreyLocStrings.ToSyn(PreyLocation.breasts)} onto the ground as a pathetic puddle of milk.",
+            priority: 10),
+            new EventString((i) => $"With a jolt, <b>{i.Target.Name}</b> erupts from <b>{i.Unit.Name}</b>'s {PreyLocStrings.ToCockSyn()} as a gush of {PreyLocStrings.ToFluid(PreyLocation.balls)}. <b>{i.Unit.Name}</b> pauses {GPPHis(i.Unit)} fleeing for a moment and mutters \"Didn't even get to enjoy you...\" before continuing {GPPHis(i.Unit)} flight.",
+            priority: 10),
+            new EventString((i) => $"Feeling a specific urge, <b>{i.Unit.Name}</b> halts {GPPHis(i.Unit)} running to place a condom over {GPPHis(i.Unit)} {PreyLocStrings.ToCockSyn()}, rubs the last of <b>{i.Target.Name}</b> out into it, and then continues running.",
+            priority: 10),
+            */
+
         };
         TransferMessages = new List<EventString>()
         {
@@ -2781,6 +2837,15 @@ static class StoredLogTexts
 
             new EventString((i) => $"<b>{i.Target.Name}</b> wraps {GPPHis(i.Unit)} mouth around <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> member and begins servicing it. <b>{i.Unit.Name}</b> can't hold on any longer and blows {GPPHis(i.Unit)} load into <b>{ApostrophizeWithOrWithoutS(i.Target.Name)}</b> mouth. <b>{i.Target.Name}</b> swallows most of it and {GPPHis(i.Target)} belly bloats out.",
             priority: 11, conditional: s => InStomach(s) && Lewd()),
+
+            new EventString((i) =>$"As <b>{i.Unit.Name}</b>'s [WFB] shrinks, <b>{i.Prey.Name}</b>{(i.Prey.IsDead ? "'s liquefied form fills" : " hits")} the thin rubber barrier between {GetRandomStringFrom($"<b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b>", $"the {GetRaceDescSingl(i.Unit)}'s")} {PreyLocStrings.ToCockSyn()} and <b>{i.Target.Name}</b>'s {PreyLocStrings.ToSyn(PreyLocation.womb)} until, with a *pop* sound, bursting through.{GetRandomStringFrom("", $" <b>{i.Unit.Name}</b> looks sheepishly at <b>{i.Target.Name}</b>. \"{GetRandomStringFrom("Oops?", "Oops.", "Sorry?", "Sorry.")}\"")}",
+            priority: 11, conditional: a => Config.CondomsForCV && Lewd()),
+            new EventString((i) =>$"As <b>{i.Unit.Name}</b> goes to have sex with <b>{i.Target.Name}</b>, {GPPHe(i.Unit)} pull{SIfSingular(i.Unit)} out a condom, before being told to put it away. Without that barrier of protection, the {PreyLocStrings.ToFluid(PreyLocation.balls)} that was once <b>{i.Prey.Name}</b> spills into <b>{i.Target.Name}</b>'s {PreyLocStrings.ToSyn(PreyLocation.womb)} unimpeded.",
+            priority: 11, conditional: a => Config.CondomsForCV && Lewd() && a.Prey.IsDead),
+            new EventString((i) =>$"<b>{i.Unit.Name}</b> slips on a condom and goes to have sex with <b>{i.Target.Name}</b>. After they're done, <b>{i.Unit.Name}</b> observes that the former <b>{i.Prey.Name}</b> is leaking from 7 small holes in the condom. Knowing what happened, <b>{i.Unit.Name}</b> shouts \"<b>{GetRandomAlly(i.Unit, i.Target, i.Prey)}</b>! Not funny!\"",
+            priority: 11, conditional: a => Config.CondomsForCV && Lewd() && a.Prey.IsDead && GetRandomAlly(a.Unit, a.Target, a.Prey) != null),
+            new EventString((i) =>$"Before having sex, <b>{i.Unit.Name}</b> looks for {GPPHis(i.Unit)} condom, but can't find it. \"I think I left it with <b>{GetRandomAlly(i.Unit, i.Target, i.Prey)}</b>. Want me to go get it?\" <b>{i.Target.Name}</b> responds \"Nah, I saw your face when that {GetRaceDescSingl(i.Prey)} went in your balls, I want to feel that myself.\" With that, the two {GetRandomStringFrom("have sex", "fuck")}, right there in the middle of the battlefield.",
+            priority: 11, conditional: a => Config.CondomsForCV && Lewd() && GetRandomAlly(a.Unit, a.Target, a.Prey) != null),
         };
         VoreStealMessages = new List<EventString>()
         {

@@ -46,9 +46,13 @@ public class TacticalMessageLog
         [OdinSerialize]
         internal Unit Prey;
         [OdinSerialize]
+        internal Unit AdditionalUnit;
+        [OdinSerialize]
         internal PreyLocation preyLocation;
         [OdinSerialize]
         internal PreyLocation oldLocation;
+        [OdinSerialize]
+        internal Race oldRace;
         [OdinSerialize]
         internal Weapon Weapon;
         [OdinSerialize]
@@ -96,7 +100,8 @@ public class TacticalMessageLog
         NewTurn,
         LowHealth,
         FeedCum,
-        RandomDigestion = 25, //Done because of a removed category
+        Forcefeeding,
+        RandomDigestion,
         Miscellaneous,
         PartialEscape,
         TailVore,
@@ -115,7 +120,11 @@ public class TacticalMessageLog
         GreatEscapeKeep,
         GreatEscapeFlee,
         ManualRegurgitation,
-        SpellCast
+        SpellCast,
+        TraitConvert,
+        TraitRebirth,
+        CumGestation,
+        ForcefeedFail
     }
 
     public void RefreshListing()
@@ -276,7 +285,9 @@ public class TacticalMessageLog
                 else
                     return $"<b>{action.Unit.Name}</b> tries to knock down <b>{action.Target.Name}</b>, but {action.Target.Name} stands {GPPHis(action.Target)} ground!{odds}";
             case MessageLogEvent.Birth:
-                return $"With a loud grunt, <b>{action.Unit.Name}</b> pushes <b>{action.Target.Name}</b> from {GPPHis(action.Unit)} womb, and breathes a sigh of relief.{odds}";
+                return GenerateBirthMessage(action);
+            case MessageLogEvent.CumGestation:
+                return GenerateCumGestationMessage(action);
             case MessageLogEvent.Resist:
                 return $"<b>{action.Unit.Name}</b> tried to vore <b>{action.Target.Name}</b>, but was fought off.{odds}";
             case MessageLogEvent.Kill:
@@ -345,7 +356,15 @@ public class TacticalMessageLog
                 return GenerateGreatEscapeFleeMessage(action);
             case MessageLogEvent.ManualRegurgitation:
                 return GenerateRegurgitationMessage(action);
-                // return $"<b>{action.Unit.Name}</b> triggers my test message by regurgitating <b>{action.Target.Name}</b>.";
+            // return $"<b>{action.Unit.Name}</b> triggers my test message by regurgitating <b>{action.Target.Name}</b>.";
+            case MessageLogEvent.Forcefeeding:
+                return GenerateForcefeedingMessage(action);
+            case MessageLogEvent.ForcefeedFail:
+                return GenerateForcefeedFailMessage(action);
+            case MessageLogEvent.TraitConvert:
+                return GenerateTraitConvertMessage(action);
+            case MessageLogEvent.TraitRebirth:
+                return GenerateTraitRebirthMessage(action);
             default:
                 return string.Empty;
         }
@@ -397,7 +416,7 @@ public class TacticalMessageLog
                     return $"<b>{action.Unit.Name}</b> looses a stream of silk from {GPPHis(action.Unit)} abdomen!";
                 goto default;
             case SpellTypes.ViperPoison:
-                return $"<b>{action.Unit.Name}</b> spits out a {GetRandomStringFrom("gob","glob","blob")} of venom!";
+                return $"<b>{action.Unit.Name}</b> spits out a {GetRandomStringFrom("gob", "glob", "blob")} of venom!";
             case SpellTypes.Petrify:
                 return $"<b>{action.Unit.Name}</b> steadies {GPPHis(action.Unit)} eyes into a death stare!";
             case SpellTypes.GlueBomb:
@@ -679,7 +698,7 @@ public class TacticalMessageLog
         }
         possibleLines.Add($"<b>{action.Unit.Name}</b> {GetRandomStringFrom("regurgitated", "released", "freed", "pushed out")} <b>{action.Target.Name}</b>{GetRandomStringFrom("", $"from {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)}")}.");
         possibleLines.Add($"<b>{action.Unit.Name}</b> decides to eject <b>{action.Target.Name}</b> from {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)}.");
-        possibleLines.Add($"As <b>{action.Unit.Name}</b> hears a gurgle{GetRandomStringFrom("", $" eminate from {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)}")}, {GPPHe(action.Unit)} force{SIfSingular(action.Unit)} <b>{action.Target.Name}</b> out, not wishing to digest {GPPHim(action.Target)}.");            
+        possibleLines.Add($"As <b>{action.Unit.Name}</b> hears a gurgle{GetRandomStringFrom("", $" eminate from {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)}")}, {GPPHe(action.Unit)} force{SIfSingular(action.Unit)} <b>{action.Target.Name}</b> out, not wishing to digest {GPPHim(action.Target)}.");
         if (action.preyLocation == PreyLocation.stomach || action.preyLocation == PreyLocation.anal)
         {
             possibleLines.Add($"<b>{action.Target.Name}</b> was released from <b>{action.Unit.Name}</b>'s stomach.");
@@ -744,6 +763,219 @@ public class TacticalMessageLog
     private string GenerateBellyRubMessage(EventLog action)
     {
         return GetStoredMessage(StoredLogTexts.MessageTypes.BellyRubMessages, action);
+    }
+
+    private string GenerateForcefeedingMessage(EventLog action)
+    {
+        if (SimpleText)
+            return $"<b>{action.Unit.Name}</b> forced {GPPHis(action.Unit)} way into <b>{action.Target.Name}</b>'s {PreyLocStrings.ToSyn(action.preyLocation)}.";
+        List<string> possibleLines = new List<string>();
+        if (action.Unit.Race == Race.Kangaroos && action.preyLocation == PreyLocation.breasts)
+        {
+            possibleLines.Add($"<b>{action.Unit.Name}</b> approaches <b>{action.Target.Name}</b> and abruptly yanks open {GPPHis(action.Unit)} [WFKP]. Before the {GetRaceDescSingl(action.Target)} can comment on how frankly rude this is, <b>{action.Unit.Name}</b> has already forced {GPPHis(action.Unit)} way inside.");
+            possibleLines.Add($"While <b>{action.Target.Name}</b> isn't paying attention, <b>{action.Unit.Name}</b> jumps into the {GetRaceDescSingl(action.Target)}'s pouch. Somehow, <b>{action.Target.Name}</b> doesn't notice this, and carries on as {GPPHeWas(action.Target)}.");
+            possibleLines.Add($"<b>{action.Unit.Name}</b> has already decided that {GPPHeIsAbbr(action.Unit)} {GetRaceDescSingl(action.Target)} food. The only questions left are who and how? For the who, <b>{action.Unit.Name}</b> selects <b>{action.Target.Name}</b>. After some thought, the {GetRaceDescSingl(action.Unit)} decides to see what the inside of a [WFKP] is like. Before <b>{action.Target.Name}</b> can attempt to stop {GPPHim(action.Unit)}, the {GetRaceDescSingl(action.Unit)} is already fully within {GPPHis(action.Target)} [WFKP].");
+            possibleLines.Add($"After forcing {GPPHimself(action.Unit)} into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} [WFKP], <b>{action.Unit.Name}</b> is a touch surprised by the way the [WFKP]'s entrance seals above {GPPHim(action.Unit)}. Unlike most force-feeders, <b>{action.Unit.Name}</b> doesn't necessarily want to be digested. So now, both <b>{action.Target.Name}</b> and <b>{action.Unit.Name}</b> get to be unhappy!");
+            possibleLines.Add($"<b>{action.Unit.Name}</b> smacks <b>{action.Target.Name}</b> across the face. While {GPPHeIs(action.Target)} dazed, <b>{action.Unit.Name}</b> climbs into {GPPHis(action.Target)} [WFKP].{GetRandomStringFrom("", $" When <b>{action.Target.Name}</b> regains {GPPHis(action.Target)} senses, {GPPHe(action.Target)} say{SIfSingular(action.Target)}, \"You could have just asked.\"")}");
+            return GetRandomStringFrom(possibleLines.ToArray());
+        }
+        possibleLines.Add($"<b>{action.Unit.Name}</b> crams {GPPHimself(action.Unit)} into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}{GetRandomStringFrom(".", "!")}");
+        possibleLines.Add($"It all happened so fast. One moment, <b>{action.Target.Name}</b> was bracing {GPPHimself(action.Target)} against a charging <b>{action.Unit.Name}</b>. The next, {GPPHis(action.Target)} {PreyLocStrings.ToSyn(action.preyLocation)} was bulging out with <b>{action.Target.Name}</b> stored inside.");
+        possibleLines.Add($"After <b>{action.Unit.Name}</b> finished forcing {GPPHimself(action.Unit)} into <b>{action.Target.Name}</b>'s {PreyLocStrings.ToSyn(action.preyLocation)}, <b>{action.Target.Name}</b> says simply; \"Rude.If you wanted in, you could've let me choose were to put you, or at least let me get some pleasure out of your journey in.\"");
+        possibleLines.Add($"One moment, <b>{action.Unit.Name}</b> was outside of <b>{action.Target.Name}</b>'s body. The next, {GPPHeWas(action.Unit)} inside. Notably, <b>{action.Target.Name}</b> was given no choice in this decision.");
+        possibleLines.Add($"<b>{action.Unit.Name}</b> walks up to <b>{action.Target.Name}</b> and unceremoniously forces {GPPHimself(action.Unit)} into the {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}. <b>{action.Target.Name}</b>, for {GPPHis(action.Target)} part stares at {GPPHis(action.Target)} {GetRandomStringFrom("bloated", "engorged", "enlarged", "bulging")} {PreyLocStrings.ToSyn(action.preyLocation)} with utter confusion.");
+        possibleLines.Add($"<b>{action.Unit.Name}</b> tackles <b>{action.Target.Name}</b>, and uses the moment of confusion to force {GPPHimself(action.Unit)} into the {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}.");
+        switch (action.preyLocation)
+        {
+            case PreyLocation.stomach:
+                possibleLines.Add($"At {GPPHis(action.Unit)} first glimpse of the {(ActorHumanoid(action.Target) ? "warrior's" : "beast's")} maw, <b>{action.Unit.Name}</b> dives right down {GPPHis(action.Target)} gullet. One swallow reflex later, <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> belly has been filled.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> walks up to <b>{action.Target.Name}</b> and pries {GPPHis(action.Target)} {PreyLocStrings.ToMouthSyn()} open before manually crawling down into {GetRandomStringFrom(ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>"), $"the {GetRaceDescSingl(action.Target)}'s")} {PreyLocStrings.ToSyn(action.preyLocation)}, much to {GetRandomStringFrom(GPPHis(action.Target), ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>"), $"the {GetRaceDescSingl(action.Target)}'s")} confusion.");
+                possibleLines.Add($"Noticing that {GPPHis(action.Target)} {PreyLocStrings.ToMouthSyn()} is slightly ajar, <b>{action.Unit.Name}</b> makes a running leap into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToMouthSyn()}, sliding quickly down into the {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}{GetRandomStringFrom(".", "!")}");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> spots <b>{action.Target.Name}</b> and decided that {GPPHeIsAbbr(action.Unit)} got to go inside. Without so much as an \"excuse me\", the {GetRaceDescSingl(action.Unit)} unapologetically forces {GPPHimself(action.Unit)} down the {GetRaceDescSingl(action.Target)}\'s {PreyLocStrings.ToMouthSyn()}.");
+                possibleLines.Add($"As <b>{action.Unit.Name}</b> walks over to <b>{action.Target.Name}</b>, {GPPHe(action.Unit)} pick{SIfSingular(action.Unit)} up a stick. Once at the {GetRaceDescSingl(action.Target)}, {GPPHe(action.Unit)} use{SIfSingular(action.Unit)} the stick to force open {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToMouthSyn()}. By the time that {GPPHe(action.Target)} can spit the stick out, the <b>{action.Target.Name}</b> is already in {GPPHis(action.Target)} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> abruptly sticks {GPPHis(action.Unit)} head in {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} mouth, looking around the inside for a few moments, before forcing {GPPHis(action.Unit)} way down into {GetRandomStringFrom(ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>"), $"the {GetRaceDescSingl(action.Target)}'s")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                break;
+            case PreyLocation.anal:
+                possibleLines.Add($"<b>{action.Unit.Name}</b> starts by shoving one {(ActorHumanoid(action.Unit) ? "arm" : "forelimb")} up <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> ass, then another. Inch by inch {GPPHe(action.Unit)} vigorously squeez{EsIfSingular(action.Unit)} {GPPHimself(action.Unit)} into the anal depths.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> jumps face-first into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, yanking {GPPHimself(action.Unit)} up and inside in a matter of moments.");
+                possibleLines.Add($"When {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} back is turned, <b>{action.Unit.Name}</b> takes {GPPHis(action.Unit)} chance, jamming {GPPHis(action.Unit)} whole body up {GetRandomStringFrom(ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>"), $"the {GetRaceDescSingl(action.Target)}'s")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> spots <b>{action.Target.Name}</b> and decided that {GPPHeIsAbbr(action.Unit)} got to go inside. Without so much as an \"excuse me,\" the {GetRaceDescSingl(action.Unit)} unapologetically forces {GPPHimself(action.Unit)} up the {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> slips behind <b>{action.Target.Name}</b> and punches {GPPHim(action.Target)} right in the {PreyLocStrings.ToSyn(action.preyLocation)}! Where most would assume this is an attack on the {GetRaceDescSingl(action.Target)}, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} next action, forcing {GPPHimself(action.Unit)} all the way inside {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)} proves the action had other motivations.");
+                possibleLines.Add($"Without giving the {GetRaceDescSingl(action.Target)} any time to argue or protest, <b>{action.Unit.Name}</b> crawls up {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                break;
+            case PreyLocation.womb:
+                possibleLines.Add($"<b>{action.Unit.Name}</b> pries apart <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> vulva using {GPPHis(action.Unit)} face, grabbing onto any body part {GPPHe(action.Unit)} can find to slip {GPPHimself(action.Unit)} all the way in, aided by the {ApostrophizeWithOrWithoutS(GetRaceDescSingl(action.Target))} contractions of sudden arousal.");
+                possibleLines.Add($"After being knocked to the ground by the {GetRaceDescSingl(action.Unit)}, <b>{action.Target.Name}</b> finds {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)} being aggressively licked by <b>{action.Target.Name}</b>. This carries on for a few moments, before <b>{action.Target.Name}</b> suddenly and rapidly shoves {GPPHimself(action.Unit)} into {GetRandomStringFrom(ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>"), $"the {GetRaceDescSingl(action.Target)}'s")} womb.");
+                //possibleLines.Add($"<b>{action.Unit.Name}</b> runs over to <b>{action.Target.Name}</b> before getting on the ground and {kneeling {between the {GetRaceDescSingl(action.Target)}'s legs<used for humanoids>/under {his/her/their} {PreyLocStrings.ToSyn(action.preyLocation)}<used for legless humanoids(Lamia, Vipers, Slimes, etc.)>}/ crawling below {his/her/their} {PreyLocStrings.ToSyn(action.preyLocation)}<used for quadrapeds and similar>}. Before <b>{action.Target.Name}</b> can question this, <b>{action.Unit.Name}</b> bolts upright, forcing {GPPHimself(action.Unit)} up into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {{PreyLocStrings.ToSyn(action.preyLocation)}/{PreyLocStrings.ToSyn(action.preyLocation)}}{!/.}");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> spots <b>{action.Target.Name}</b> and decided that {GPPHeIsAbbr(action.Unit)} got to go inside. Running over, <b>{action.Unit.Name}</b> rapidly pushes {GPPHis(action.Unit)} way into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> slips behind <b>{action.Target.Name}</b> and kicks {GPPHim(action.Target)} right in the {PreyLocStrings.ToSyn(action.preyLocation)}! Where most would assume this is an attack on the {GetRaceDescSingl(action.Target)}, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} next action, knocking <b>{action.Target.Name}</b> over and forcing {GPPHimself(action.Unit)} further into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)} proves the action had other motivations.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> sticks a finger up {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}. Then a hand. Then a whole arm. Then two hands. Then <b>{action.Unit.Name}</b> pushes off the ground to force {GPPHimself(action.Unit)} all the way up into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                break;
+            case PreyLocation.balls:
+                possibleLines.Add($"<b>{action.Unit.Name}</b> sucks <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> tip. As soon as {GPPHe(action.Unit)} start{SIfSingular(action.Unit)} sticking {GPPHis(action.Unit)} tongue inside, however, it's more like the {ApostrophizeWithOrWithoutS(InfoPanel.RaceSingular(action.Target))} throbbing member is doing the sucking, allowing <b>{action.Unit.Name}</b> to wiggle all the way into {GPPHis(action.Target)} sack.");
+                possibleLines.Add($"One moment, <b>{action.Unit.Name}</b> was just walking up to <b>{action.Target.Name}</b>, then, not even two seconds later, <b>{action.Unit.Name}</b> had already shoved half of {GPPHis(action.Unit)} body down the shocked {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}! Only three or so seconds after that, <b>{action.Unit.Name}</b> was fully in {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> strokes {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, getting it nice and {GetRandomStringFrom("hard", "erect")}, before shoving {GPPHimself(action.Unit)} down into the unprepared {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}{GetRandomStringFrom(".", "!")}");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> has spotted {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}. In that instant, <b>{action.Unit.Name}</b> knows exactly what {GPPHe(action.Unit)} must do. Without any warning, <b>{action.Unit.Name}</b> is shoving {GPPHimself(action.Unit)} down {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, the lenth of the shaft bulging with the {GetRaceDescSingl(action.Unit)}'s every movement.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> gives <b>{action.Target.Name}</b> a blowjob. As <b>{action.Target.Name}</b> nears ejaculation, <b>{action.Unit.Name}</b> pulls back and then dives head first down {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> sticks {GPPHis(action.Unit)} hand down {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}. Then the {GetRaceDescSingl(action.Unit)} grabs some of the loose skin around the {PreyLocStrings.ToSyn(action.preyLocation)} from the inside, and uses it as a handhold to rapidly, and not particularaly pleasently, pull {GPPHimself(action.Unit)} into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}."); //Ideally, there would be some check to insure that the two uses of {PreyLocStrings.ToSyn(action.preyLocation)} in this line always pull different words, but if that isn't possible, it should still be fine.
+                break;
+            case PreyLocation.breasts:
+                possibleLines.Add($"In just a few deft movements, <b>{action.Unit.Name}</b> crams {GPPHimself(action.Unit)} into <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> tits.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> charges into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, briefly motorboating {GPPHim(action.Target)} before pushing extra hard and vanishing into the space between the {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"Using {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)} as handholds, <b>{action.Unit.Name}</b> pulls {GPPHimself(action.Unit)} into the {GetRaceDescSingl(action.Target)}'s cleavage.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> approaches <b>{action.Target.Name}</b> and abruptly pulls apart {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)}, before stuffing {GPPHimself(action.Unit)} into the gap between.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> grabs {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)} and shoves {GPPHimself(action.Unit)} between {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)}! Much to {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} surprise, {GPPHe(action.Unit)} sink{SIfSingular(action.Unit)} into the soft flesh at the bottom, becoming living fat on {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> knocks <b>{action.Target.Name}</b> down onto {GPPHis(action.Unit)} back, before {GetRandomStringFrom("jumping feet", "diving head")}-first into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, disappearing with one quick *shlump* noise.");
+                break;
+            case PreyLocation.leftBreast:
+            case PreyLocation.rightBreast:
+                possibleLines.Add($"In just a few deft movements, <b>{action.Unit.Name}</b> crams {GPPHimself(action.Unit)} into <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {GetRandomStringFrom("tit", "boob", "breast")}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> grabs {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {PreyLocStrings.ToSyn(action.preyLocation)} and shoves it into {GPPHis(action.Unit)} face. Then, with a wet *shlorp* sound, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} head disappears into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, followed shortly by the rest of {GPPHis(action.Unit)} body.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> latches onto {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {PreyLocStrings.ToSyn(action.preyLocation)}, suckling for a moment or two, before forcing {GPPHimself(action.Unit)} through the nipple, and vanishing into the boob beyond.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> spots <b>{action.Target.Name}</b> and decided that {GPPHeIsAbbr(action.Unit)} got to go inside. With a motion resembling a headbutt, <b>{action.Unit.Name}</b> slips {GPPHis(action.Unit)} head into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {PreyLocStrings.ToSyn(action.preyLocation)}, followed shortly by the rest of {GPPHis(action.Unit)} body.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> sucks on {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {PreyLocStrings.ToSyn(action.preyLocation)}. As <b>{action.Target.Name}</b> relaxes to let it happen, <b>{action.Unit.Name}</b> pulls back and then dives head first into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {PreyLocStrings.ToSyn(action.preyLocation)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> knocks <b>{action.Target.Name}</b> down onto {GPPHis(action.Unit)} back, before kicking the center of {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {PreyLocStrings.ToSyn(action.preyLocation)}, getting {GPPHis(action.Unit)} foot inside. Then {GPPHe(action.Unit)} slowly feed{SIfSingular(action.Unit)} the rest of {GPPHimself(action.Unit)} into the {GetRaceDescSingl(action.Target)}'s {PreyLocStrings.ToSyn(action.preyLocation)}.<Line should be off-limits to feetless units(Lamia, Vipers, etc.) and non-bipedal units (Feral Lizard, Schiwardez, etc.).>");
+                break;
+            default:
+                return $"Where is";
+        }
+        return GetRandomStringFrom(possibleLines.ToArray());
+    }
+
+    private string GenerateForcefeedFailMessage(EventLog action)
+    {
+        if (SimpleText)
+            return $"<b>{action.Unit.Name}</b> forced {GPPHis(action.Unit)} way into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}.";
+        List<string> possibleLines = new List<string>();
+        possibleLines.Add($"As <b>{action.Unit.Name}</b> attempts to pry open {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} mouth, {GPPHeIs(action.Unit)} rather surprised to find that {GetRandomStringFrom(ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>"), GetRaceDescSingl(action.Target))} mouth seems incapable of stretching far enough.");
+        possibleLines.Add($"<b>{action.Unit.Name}</b> attempts to stick {GPPHis(action.Unit)} head up {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} [WFA], only to find that it refuses to open anywhere near large enough for that.{GetRandomStringFrom("", $"<b>{action.Target.Name}</b> kindly asks the {GetRaceDescSingl(action.Unit)} to stop.")}");
+        possibleLines.Add($"{ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} attempt to force-feed {GPPHimself(action.Unit)} into <b>{action.Target.Name}</b> has been thwarted by the refusal of any holes on the {GetRaceDescSingl(action.Target)}'s body to open anywhere near wide enough.");
+        if (action.Target.HasDick)
+            possibleLines.Add($"<b>{action.Unit.Name}</b> strokes {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToCockSyn()}, getting it nice and {GetRandomStringFrom("hard", "stiff", "erect")}, before attempting to pry open the tip to get inside, only to find that the tip barely opens wide enough to fit a blade of grass, let alone a whole {GetRaceDescSingl(action.Unit)}.");
+        if (action.Target.HasVagina)
+            possibleLines.Add($"<b>{action.Unit.Name}</b> sticks {GPPHis(action.Unit)} hand up {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(PreyLocation.womb)}, getting it nice and wet, before attempting to push further in, only to find that {GPPHeIsAbbr(action.Unit)} already about as far in as {GPPHe(action.Unit)} can go{GetRandomStringFrom(".", $", and that {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {PreyLocStrings.ToSyn(PreyLocation.womb)} isn't budging any further.")}");
+        return GetRandomStringFrom(possibleLines.ToArray());
+    }
+    private string GenerateTraitConvertMessage(EventLog action)
+    {
+        //State.World?.MainEmpires != null && (State.World.GetEmpireOfSide(action.Unit.Side))
+        if (SimpleText)
+            return $"{action.Prey.Name} converted from one side to another thanks to {action.Unit.Name}'s digestion conversion trait.";
+        List<string> possibleLines = new List<string>();
+        possibleLines.Add($"With {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} body partially dissolved, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body takes this opportunity to rewrite {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} worldview before putting {GPPHim(action.Prey)} back together and letting them out, now to fight for {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} side.");
+        possibleLines.Add($"Right before death within <b>{action.Unit.Name}</b>, <b>{action.Prey.Name}</b> is released on the condition of joining {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} side of the battle.");
+        possibleLines.Add($"<b>{action.Prey.Name}</b> emerges from <b>{action.Unit.Name}</b> a changed {GetRaceDescSingl(action.Prey)}, ready to fight for {(State.GameManager.PureTactical ? $"the {GetRaceDescSingl(action.Unit)}" : $"the {State.World.GetEmpireOfSide(action.Unit.Side)}")}.");
+        if (!State.GameManager.PureTactical)
+        {
+            possibleLines.Add($"<b>{action.Prey.Name}</b> was converted to the side of the {State.World.GetEmpireOfSide(action.Unit.Side)}, thanks to a large amount of \"persuasion\" by <b>{action.Unit.Name}</b>.");
+            possibleLines.Add($"Within <b>{action.Unit.Name}</b>, <b>{action.Prey.Name}</b> has been brainwashed, and {(State.World.GetEmpireOfSide(action.Unit.Side).Race >= Race.Selicia ? $"is now ready to do the {State.World.GetEmpireOfSide(action.Unit.Side).Race}' bidding" : $"now fully believes in the {InfoPanel.RaceSingular(State.World.GetEmpireOfSide(action.Unit.Side))} cause.")}");
+        }
+            
+        return GetRandomStringFrom(possibleLines.ToArray());
+    }
+    private string GenerateTraitRebirthMessage(EventLog action)
+    {
+        if (SimpleText)
+            return $"{action.Prey.Name} converted from one side to another and changed race thanks to {action.Unit.Name}'s converting digestion rebirth trait.";
+        if (action.Unit.Race == Race.Slimes)
+            return $"With a squelch, <b>{action.Unit.Name}</b> performs mitosis{(action.oldRace == action.Prey.Race ? "." : $", <b>{action.Prey.Name}</b> becoming a seperate slime.")}";
+        List<string> possibleLines = new List<string>();
+
+        possibleLines.Add($"<b>{action.Prey.Name}</b> is expelled from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, {(action.oldRace == action.Prey.Race ? "with a changed outlook on life" : "changed in mind and body")}.");
+        possibleLines.Add($"Finished, <b>{action.Prey.Name}</b> is released from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, {(action.oldRace == action.Prey.Race ? $"now ready to fight alongside <b>{action.Unit.Name}</b> rather than against {GPPHim(action.Unit)}." : "a changed person. Quite literally.")}");
+        if (action.oldRace == action.Prey.Race)
+            possibleLines.Add($"Within <b>{action.Unit.Name}</b>, <b>{action.Prey.Name}</b> has been transformed into {RaceArticleSingular(action.Prey.Race)}. With the process complete, <b>{action.Prey.Name}</b> is freed into the world once more.");
+
+        possibleLines.Add($"With {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} body partially dissolved, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body takes this opportunity to rewrite {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} worldview and genetics, before allowing the brand new {GetRaceDescSingl(action.Prey)} back out.");
+        possibleLines.Add($"<b>{action.Prey.Name}</b> is released from inside {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body, though now as {RaceArticleSingular(action.Prey.Race)}.");
+        possibleLines.Add($"As <b>{action.Prey.Name}</b> is released from <b>{action.Unit.Name}</b>, {GPPHe(action.Prey)} look{SIfSingular(action.Prey)} at {GPPHimself(action.Prey)}, and note that {GPPHeIs(action.Prey)} now {RaceArticleSingular(action.Prey.Race)}.");
+        possibleLines.Add($"{Capitalize(RaceArticleSingular(action.Prey.Race))} is expelled from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body, the brand new form of <b>{action.Prey.Name}</b>.");
+        possibleLines.Add($"<b>{action.Prey.Name}</b> emerges from <b>{action.Unit.Name}</b> changed into {RaceArticleSingular(action.Prey.Race)}.");
+
+        switch (action.preyLocation)
+        {
+            case PreyLocation.womb:
+                possibleLines.Add($"Feeling that <b>{action.Prey.Name}</b> has completed {GPPHis(action.Prey)} stay in {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(action.preyLocation)}, <b>{action.Unit.Name}</b> gives birth to <b>{action.Prey.Name}</b>, who looks to {GPPHis(action.Prey)} new mother for directions.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> gets down and gives birth to <b>{action.Prey.Name}</b>{GetRandomStringFrom(".", ", who tries to go back in after being nearly blinded by the light.")}"); // this version is meant to be used if A;<b>{action.Prey.Name}</b> has eyes and B;it isn't night.
+                if(action.oldRace != action.Prey.Race)
+                {
+                    possibleLines.Add($"As <b>{action.Prey.Name}</b> wakes up within {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)}, {GPPHe(action.Prey)} start{SIfSingular(action.Prey)} to struggle. Taking this as a sign, <b>{action.Unit.Name}</b> gets down and rebirths <b>{action.Prey.Name}</b> into this world.");
+                    possibleLines.Add($"{ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} womb, having completed the task of taking <b>{action.Prey.Name}</b> apart and putting {GPPHim(action.Prey)} back together as something new, signals {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} brain that it's time to see what <b>{action.Prey.Name}</b> has become. With only a few skilled pushes, <b>{action.Prey.Name}</b> is reborn, now as {RaceArticleSingular(action.Prey.Race)}.");
+                    possibleLines.Add($"It is done. {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} womb has done its work, and <b>{action.Prey.Name}</b> is now {RaceArticleSingular(action.Prey.Race)}. Getting down, <b>{action.Unit.Name}</b> births <b>{action.Prey.Name}</b> back into this world.");
+                }
+                break;
+            case PreyLocation.stomach:
+            case PreyLocation.stomach2:
+                possibleLines.Add($"\"Okay, I think you're done,\" <b>{action.Unit.Name}</b> says before coughing up <b>{action.Prey.Name}</b>{(action.oldRace == action.Prey.Race ? "." : $", who appears to have become {RaceArticleSingular(action.Prey.Race)}.")}");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> barfs up <b>{action.Prey.Name}</b>cxaZ, {(action.oldRace == action.Prey.Race ? "who seems fully intact, if a little tired." : $"who emerges as a brand new {GetRaceDescSingl(action.Prey)}.")}"); 
+                possibleLines.Add($"With a grumble from {GPPHis(action.Unit)} guts, <b>{action.Unit.Name}</b> squats and pushes out a living {GetRaceDescSingl(action.Prey)}. {(action.oldRace == action.Prey.Race ? $"<b>{action.Unit.Name}</b> looks behind {GPPHim(action.Unit)} and exclaims, \"Woah, you're alive?\"" : $"<b>{action.Unit.Name}</b> looks to <b>{action.Prey.Name}</b> and tells {GPPHim(action.Prey)}, \"Be glad my guts turned you into {RaceArticleSingular(action.Prey.Race)}, and not into {GetRaceDescSingl(action.Unit)} [WFF].\"")}");
+                possibleLines.Add($"After pushing <b>{action.Prey.Name}</b> out {GPPHis(action.Unit)} {PreyLocStrings.ToSyn(PreyLocation.anal)}, <b>{action.Unit.Name}</b> turns and tells <b>{action.Prey.Name}</b>, {(action.oldRace == action.Prey.Race ? "\"You smell bad. You... should probably fix that.\"" : $"\"Congrats on becoming {RaceArticleSingular(action.Prey.Race)}! Sorry your first moments as one had to smell this bad, though...\"")}"); 
+                break;
+            case PreyLocation.balls:
+                possibleLines.Add($"With one last grunt, <b>{action.Prey.Name}</b> erupts, alive, from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToCockSyn()}.{(action.oldRace == action.Prey.Race ? "" : $" <b>{action.Prey.Name}</b> hasn't noticed yet, but {GPPHis(action.Prey)} stay in {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToBallSynSing()} appears to have overwrote {GPPHis(action.Prey)} {GetRandomStringFrom("DNA", "genetic code")}, making {GPPHim(action.Prey)} into {RaceArticleSingular(action.Prey.Race)}.")}");
+                if (action.oldRace == action.Prey.Race)
+                {
+                    possibleLines.Add($"During the time spent in {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToSyn(PreyLocation.balls)}, the {GetRaceDescSingl(action.Unit)}'s {PreyLocStrings.ToFluid(PreyLocation.balls)} had been attacking {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} very {GetRandomStringFrom("DNA", "genetics", "genes")}, rewriting them into a brand new {GetRaceDescSingl(action.Prey)}.");
+                    possibleLines.Add($"It is done. {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} sperm has done its work, and <b>{action.Prey.Name}</b> is now {RaceArticleSingular(action.Prey.Race)}. With a tight grip on {GPPHis(action.Unit)} {PreyLocStrings.ToCockSyn()}, <b>{action.Unit.Name}</b> {GetRandomStringFrom("faps", "masturbates")}, going faster and faster until <b>{action.Prey.Name}</b> is launched back into the world, alongside a healthy dose of {PreyLocStrings.ToFluid(PreyLocation.balls)}.");
+                }
+                break;
+            case PreyLocation.leftBreast:
+            case PreyLocation.rightBreast:
+                possibleLines.Add($"<b>{action.Unit.Name}</b> grips {GPPHis(action.Unit)} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} {PreyLocStrings.ToBreastSynSing()} and squeezes, forcing out a milk soaked {(action.oldRace == action.Prey.Race ? $"<b>{action.Prey.Name}</b>" : GetRaceDescSingl(action.Prey))}.");
+                if (action.oldRace == action.Prey.Race)
+                {
+                    possibleLines.Add($"Sensing that {GPPHis(action.Unit)} {PreyLocStrings.ToBreastSynSing()} has done its job, <b>{action.Unit.Name}</b> forces a milk-soaked {GetRaceDescSingl(action.Prey)} from {GPPHis(action.Unit)} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} nipple, the new form of <b>{action.Prey.Name}</b>.");
+                    possibleLines.Add($"It is done. {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {(action.preyLocation == PreyLocation.leftBreast ? "left" : "right")} breast has done its work, and <b>{action.Prey.Name}</b> is now {RaceArticleSingular(action.Prey.Race)}. <b>{action.Unit.Name}</b> sucks {GPPHis(action.Unit)} {PreyLocStrings.ToBreastSynSing()} until enough of <b>{action.Prey.Name}</b> has popped out for <b>{action.Unit.Name}</b> to grab {GPPHim(action.Prey)} and pull the {GetRaceDescSingl(action.Prey)} out.");
+                }
+                
+                break;
+            case PreyLocation.breasts:
+                possibleLines.Add($"{ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} essence is abruptly shot from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToSyn(action.preyLocation)} as pure milk, before coagulating and reforming into {RaceArticleSingular(action.Prey.Race)}.");
+                possibleLines.Add($"Feeling like showing mercy, <b>{action.Unit.Name}</b> decides to release <b>{action.Prey.Name}</b> from {GPPHis(action.Unit)} {GetRandomStringFrom($"{PreyLocStrings.ToBreastSynSing()} fat", PreyLocStrings.ToSyn(action.preyLocation))}. However, it would seem that {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} stay in the {GetRaceDescSingl(action.Unit)}'s {PreyLocStrings.ToBreastSynSing()} altered {GPPHis(action.Prey)} very essence, turning {GPPHim(action.Prey)} into {RaceArticleSingular(action.Prey.Race)}.");
+                if (action.oldRace == action.Prey.Race)
+                    possibleLines.Add($"It is done. {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} boobs have done their work, and <b>{action.Prey.Name}</b> is now {RaceArticleSingular(action.Prey.Race)}. For a moment, the flesh between {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToBreastSynSing()} appears to stretch and contort, until, all at once, <b>{action.Prey.Name}</b> and {GPPHis(action.Prey)} new form slip out into the world once more.");
+                break;
+            default:
+                break;
+        }
+        return GetRandomStringFrom(possibleLines.ToArray());
+    }
+    private string GenerateBirthMessage(EventLog action)
+    {
+        if (SimpleText)
+            return $"With a loud grunt, <b>{action.Unit.Name}</b> pushes <b>{action.Target.Name}</b> from {GPPHis(action.Unit)} womb, and breathes a sigh of relief.{action.Odds}";
+        List<string> possibleLines = new List<string>();
+        possibleLines.Add($"With {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} body partially dissolved, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body takes this opportunity to rewrite {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} worldview and genetics, before allowing the brand new {GetRaceDescSingl(action.Prey)} back out.");
+        possibleLines.Add($"<b>{action.Prey.Name}</b> is released from inside {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body, though now as {RaceArticleSingular(action.Prey.Race)}.");
+        possibleLines.Add($"As <b>{action.Prey.Name}</b> is released from <b>{action.Unit.Name}</b>, {GPPHe(action.Prey)} look{SIfSingular(action.Prey)} at {GPPHimself(action.Prey)}, and note that {GPPHeIs(action.Prey)} now {RaceArticleSingular(action.Prey.Race)}.");
+        possibleLines.Add($"{Capitalize(RaceArticleSingular(action.Prey.Race))} is expelled from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body, the brand new form of <b>{action.Prey.Name}</b>.");
+        possibleLines.Add($"<b>{action.Prey.Name}</b> emerges from <b>{action.Unit.Name}</b> changed into {RaceArticleSingular(action.Prey.Race)}.");
+        return GetRandomStringFrom(possibleLines.ToArray());
+    }
+    private string GenerateCumGestationMessage(EventLog action)
+    {
+        if (SimpleText)
+            return $"<b>{action.Unit.Name}</b> pumps what remains of <b>{action.Prey.Name}</b> into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} womb, providing nutrients to strengthen <b>{action.AdditionalUnit.Name}</b>.";
+        List<string> possibleLines = new List<string>();
+        possibleLines.Add($"<b>{action.Unit.Name}</b> pumps what remains of <b>{action.Prey.Name}</b> into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} womb, providing nutrients to strengthen <b>{action.AdditionalUnit.Name}</b>.");
+        possibleLines.Add($"As <b>{action.Unit.Name}</b> and <b>{action.Target.Name}</b> {GetRandomStringFrom("have sex", "fuck")}, the liquid remains of <b>{action.Prey.Name}</b> shoot into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")}, where what little remains of <b>{action.Prey.Name}</b> is simply absorbed into <b>{action.AdditionalUnit.Name}</b>.");
+        possibleLines.Add($"The {PreyLocStrings.ToFluid(PreyLocation.balls)} that was once <b>{action.Prey.Name}</b> travels up {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToCockSyn()}, the former {GetRaceDescSingl(action.Prey)} gushing up into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")} where {GPPHeIs(action.Prey)} promptly absorbed into <b>{action.AdditionalUnit.Name}</b>.");
+        possibleLines.Add($"<b>{action.Target.Name}</b> rides {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToCockSyn()}, milking out a liqufied <b>{action.Prey.Name}</b>, who flows into the already occupied {GetRandomStringFrom("womb", "uterus")}, where {GPPHis(action.Prey)} remains fuse with <b>{action.AdditionalUnit.Name}</b>.");
+        possibleLines.Add($"<b>{action.Target.Name}</b> pushes <b>{action.Unit.Name}</b> down to the ground and fucks {GPPHim(action.Unit)} until the liquid remains of <b>{action.Prey.Name}</b> flow up into {GPPHis(action.Target)} {GetRandomStringFrom("womb", "uterus")}, where <b>{action.Prey.Name}</b> is absorbed into <b>{action.AdditionalUnit.Name}</b>.");
+        possibleLines.Add($"<b>{action.Unit.Name}</b> pumps <b>{action.Prey.Name}</b> through {GPPHis(action.Unit)} {PreyLocStrings.ToCockSyn()} and into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")}, where {GPPHis(action.Prey)} remains are used by <b>{action.AdditionalUnit.Name}</b> to fuel {GPPHis(action.AdditionalUnit)} growth.");
+        if (Config.CondomsForCV)
+        {
+            possibleLines.Add($"As <b>{action.Unit.Name}</b> and <b>{action.Target.Name}</b> have sex, an untimely squirm from <b>{action.AdditionalUnit.Name}</b> coincides with <b>{action.Unit.Name}</b> cumming hard, allowing the former {GetRaceDescSingl(action.Prey)} <b>{action.Prey.Name}</b> to rip through the condom, flowing into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")} before being absorbed into the regrowing <b>{action.AdditionalUnit.Name}</b>.");
+            possibleLines.Add($"As <b>{action.Unit.Name}</b> goes to have sex with <b>{action.Target.Name}</b>, {GPPHe(action.Unit)} pull{SIfSingular(action.Unit)} out a condom, before being told to put it away. Without that barrier of protection, the {PreyLocStrings.ToFluid(PreyLocation.balls)} that was once <b>{action.Prey.Name}</b> spills into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")} unimpeded, where it is easily absorbed into <b>{action.AdditionalUnit.Name}</b>.");
+            possibleLines.Add($"As {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} {PreyLocStrings.ToBallSynSing()} shrinks, {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} liquefied form fills the rubber barrier between {GetRandomStringFrom(ApostrophizeWithOrWithoutS(action.Unit.Name), $"the {ApostrophizeWithOrWithoutS(GetRaceDescSingl(action.Unit))}")} {PreyLocStrings.ToCockSyn()} and {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")}. As <b>{action.Unit.Name}</b> pulls {GPPHis(action.Unit)} {PreyLocStrings.ToCockSyn()} back out, the condom is left behind, where it is pulled into {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")}, and it is there that it pops, with <b>{action.Prey.Name}</b> becoming a shower of nutrients for <b>{action.AdditionalUnit.Name}</b>.");
+            Unit randomAlly = GetRandomAlly(action.Unit, action.Target, action.Prey, action.AdditionalUnit);
+            if (randomAlly != null)
+            {
+                possibleLines.Add($"<b>{action.Unit.Name}</b> slips on a condom and goes to have sex with <b>{action.Target.Name}</b>. After they're done, <b>{action.Unit.Name}</b> observes that former <b>{action.Prey.Name}</b> is leaking from 7 small holes in the condom. Knowing what happened, <b>{action.Unit.Name}</b> shouts \"{randomAlly.Name}! Not funny!\" Within {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} {GetRandomStringFrom("womb", "uterus")}, the trickling streams of \"<b>{action.Prey.Name}</b>\" are absorbed by <b>{action.AdditionalUnit.Name}</b>.");
+                possibleLines.Add($"Before having sex, <b>{action.Unit.Name}</b> looks for {GPPHis(action.Unit)} condom, but can't find it. \"I think I left it with {randomAlly.Name}. Want me to go get it?\" <b>{action.Target.Name}</b> responds \"Nah, I got a {GetRaceDescSingl(action.AdditionalUnit)} in my {GetRandomStringFrom("womb", "belly", "tummy")}, they'll absorb everything.\" True to {GPPHis(action.Target)} word, the remains of <b>{action.Prey.Name}</b> are absorbed by <b>{action.AdditionalUnit.Name}</b>.");
+            }
+        }
+        return GetRandomStringFrom(possibleLines.ToArray());
     }
 
     private string GenerateUBSwallowMessage(EventLog action)
@@ -1097,14 +1329,15 @@ public class TacticalMessageLog
         UpdateListing();
     }
 
-    public void RegisterBirth(Unit predator, Unit prey, float odds)
+    public void RegisterBirth(Unit predator, Unit prey, float odds, string extra = "none")
     {
         events.Add(new EventLog
         {
             Type = MessageLogEvent.Birth,
             Unit = predator,
             Target = prey,
-            Odds = odds
+            Odds = odds,
+            Extra = extra
         });
         UpdateListing();
     }
@@ -1438,6 +1671,69 @@ public class TacticalMessageLog
             Unit = predator,
             Target = prey,
             preyLocation = loc,
+        });
+        UpdateListing();
+    }
+
+    public void RegisterForcefeed(Unit prey, Unit forcedPred, PreyLocation loc)
+    {
+        events.Add(new EventLog
+        {
+            Type = MessageLogEvent.Forcefeeding,
+            Unit = prey,
+            Target = forcedPred,
+            preyLocation = loc,
+        });
+        UpdateListing();
+    }
+
+    public void RegisterForcefeedFail(Unit prey, Unit target)
+    {
+        events.Add(new EventLog
+        {
+            Type = MessageLogEvent.ForcefeedFail,
+            Unit = prey,
+            Target = target
+        });
+        UpdateListing();
+    }
+
+    public void RegisterTraitConvert(Unit pred, Unit prey, PreyLocation loc)
+    {
+        events.Add(new EventLog
+        {
+            Type = MessageLogEvent.TraitConvert,
+            Unit = pred,
+            Target = prey,
+            Prey = prey,
+            preyLocation = loc,
+        });
+        UpdateListing();
+    }
+
+    public void RegisterTraitRebirth(Unit pred, Unit prey, PreyLocation loc, Race origRace)
+    {
+        events.Add(new EventLog
+        {
+            Type = MessageLogEvent.TraitRebirth,
+            Unit = pred,
+            Target = prey,
+            Prey = prey,
+            preyLocation = loc,
+            oldRace = origRace
+        });
+        UpdateListing();
+    }
+
+    public void RegisterCumGestation(Unit pred, Unit mother, Unit seed, Unit offspring)
+    {
+        events.Add(new EventLog
+        {
+            Type = MessageLogEvent.CumGestation,
+            Unit = pred,
+            Target = mother,
+            Prey = seed,
+            AdditionalUnit = offspring
         });
         UpdateListing();
     }

@@ -1380,7 +1380,7 @@ public class PredatorComponent
                 preyUnit.Actor.Movement = 0;
                 preyUnit.ChangeSide(unit.Side);
                 FreeUnit(preyUnit.Actor);
-                TacticalUtilities.Log.RegisterBirth(unit, preyUnit.Unit, 1f);
+                TacticalUtilities.Log.RegisterBirth(unit, preyUnit.Unit, 1f, "convert");
                 if (!State.GameManager.TacticalMode.turboMode)
                     actor.SetBirthMode();
                 return 0;
@@ -1400,9 +1400,9 @@ public class PredatorComponent
 
                 preyUnit.ChangeSide(unit.Side);
                 State.GameManager.TacticalMode.TacticalStats.RegisterRegurgitation(unit.Side);
+                TacticalUtilities.Log.RegisterTraitConvert(unit, preyUnit.Unit, Location(preyUnit));
                 FreeUnit(preyUnit.Actor);
-
-                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{preyUnit.Unit.Name} converted from one side to another thanks to {unit.Name}'s digestion conversion trait.");
+                //State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{preyUnit.Unit.Name} converted from one side to another thanks to {unit.Name}'s digestion conversion trait.");
                 return 0;
             }
             if (unit.HasTrait(Traits.DigestionRebirth) && State.Rand.Next(2) == 0 && preyUnit.Unit.CanBeConverted() && (Config.SpecialMercsCanConvert || unit.DetermineConversionRace() < Race.Selicia))
@@ -1414,10 +1414,11 @@ public class PredatorComponent
                 // use source race IF changeling already had this ability before transforming
                 preyUnit.Unit.Health = preyUnit.Unit.MaxHealth / 2;
                 preyUnit.ChangeSide(unit.Side);
+                Race origRace = preyUnit.Unit.Race;
                 preyUnit.ChangeRace(conversionRace);
-                TacticalUtilities.Log.RegisterBirth(unit, preyUnit.Unit, 0.5f);
+                TacticalUtilities.Log.RegisterTraitRebirth(unit, preyUnit.Unit, Location(preyUnit), origRace);
                     FreeUnit(preyUnit.Actor);
-                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{preyUnit.Unit.Name} converted from one side to another and changed race thanks to {unit.Name}'s converting digestion rebirth trait.");
+                //State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{preyUnit.Unit.Name} converted from one side to another and changed race thanks to {unit.Name}'s converting digestion rebirth trait.");
                 return 0;
             }
             preyUnit.Actor.KilledByDigestion = true;
@@ -1546,7 +1547,7 @@ public class PredatorComponent
                         preyUnit.ChangeRace(conversionRace);
                     }
                     FreeUnit(preyUnit.Actor);
-                    TacticalUtilities.Log.RegisterBirth(unit, preyUnit.Unit, 1f);
+                    TacticalUtilities.Log.RegisterBirth(unit, preyUnit.Unit, 1f, "rebirth");
                     if (!State.GameManager.TacticalMode.turboMode)
                         actor.SetBirthMode();
                     RemovePrey(preyUnit);
@@ -3361,7 +3362,7 @@ public class PredatorComponent
                 recipient.PredatorComponent.birthStatBoost += preyUnit.Unit.Level;
                 recipient.PredatorComponent.RemovePrey(preyUnit);
                 actor.PredatorComponent.RemovePrey(preyUnit);
-                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{actor.Unit.Name}</b> pumps what remains of <b>{preyUnit.Unit.Name}</b> into <b>{recipient.Unit.Name}</b>'s womb, providing nutrients to strengthen <b>{alreadyChild.Unit.Name}</b>.");
+                State.GameManager.TacticalMode.Log.RegisterCumGestation(actor.Unit, recipient.Unit, preyUnit.Unit, alreadyChild.Unit);
                 if (unit.HasTrait(Traits.Corruption) || preyUnit.Unit.HasTrait(Traits.Corruption))
                 {
                     alreadyChild.Unit.hiddenFixedSide = true;
@@ -3577,21 +3578,21 @@ public class PredatorComponent
         {
             case PreyLocation.womb:
                 State.GameManager.SoundManager.PlaySwallow(PreyLocation.womb, actor);
-                TacticalUtilities.Log.RegisterMiscellaneous($"<b>{forcePrey.Unit.Name}</b> pries apart <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> vulva using {LogUtilities.GPPHis(forcePrey.Unit)} face, grabbing onto any bodypart {LogUtilities.GPPHe(forcePrey.Unit)} can find to slip {LogUtilities.GPPHimself(forcePrey.Unit)} all the way in, aided by the {LogUtilities.ApostrophizeWithOrWithoutS(LogUtilities.GetRaceDescSingl(unit))} contractions of sudden arousal.");
+                //TacticalUtilities.Log.RegisterMiscellaneous($"<b>{forcePrey.Unit.Name}</b> pries apart <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> vulva using {LogUtilities.GPPHis(forcePrey.Unit)} face, grabbing onto any bodypart {LogUtilities.GPPHe(forcePrey.Unit)} can find to slip {LogUtilities.GPPHimself(forcePrey.Unit)} all the way in, aided by the {LogUtilities.ApostrophizeWithOrWithoutS(LogUtilities.GetRaceDescSingl(unit))} contractions of sudden arousal.");
                 AddToWomb(preyref, 1f);
                 break;
             case PreyLocation.balls:
                 State.GameManager.SoundManager.PlaySwallow(PreyLocation.balls, actor);
                 AddToBalls(preyref, 1f);
-                TacticalUtilities.Log.RegisterMiscellaneous($"<b>{forcePrey.Unit.Name}</b> sucks <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> tip. As soon as {LogUtilities.GPPHe(forcePrey.Unit)} start{LogUtilities.SIfSingular(forcePrey.Unit)} sticking {LogUtilities.GPPHis(forcePrey.Unit)} tongue inside, however, it's more like the {LogUtilities.ApostrophizeWithOrWithoutS(InfoPanel.RaceSingular(unit))} throbbing member is doing the sucking, allowing <b>{forcePrey.Unit.Name}</b> to wiggle all the way into {LogUtilities.GPPHis(unit)} sack.");
+                //TacticalUtilities.Log.RegisterMiscellaneous($"<b>{forcePrey.Unit.Name}</b> sucks <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> tip. As soon as {LogUtilities.GPPHe(forcePrey.Unit)} start{LogUtilities.SIfSingular(forcePrey.Unit)} sticking {LogUtilities.GPPHis(forcePrey.Unit)} tongue inside, however, it's more like the {LogUtilities.ApostrophizeWithOrWithoutS(InfoPanel.RaceSingular(unit))} throbbing member is doing the sucking, allowing <b>{forcePrey.Unit.Name}</b> to wiggle all the way into {LogUtilities.GPPHis(unit)} sack.");
                 break;
             case PreyLocation.anal:
                 State.GameManager.SoundManager.PlaySwallow(PreyLocation.anal, actor);
-                TacticalUtilities.Log.RegisterMiscellaneous($"<b>{forcePrey.Unit.Name}</b> starts by shoving one {(LogUtilities.ActorHumanoid(forcePrey.Unit) ? "arm" : "forelimb")} up <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> ass, then another. Inch by inch {LogUtilities.GPPHe(forcePrey.Unit)} vigorously squeez{LogUtilities.EsIfSingular(forcePrey.Unit)} {LogUtilities.GPPHimself(forcePrey.Unit)} into the anal depths.");
+                //TacticalUtilities.Log.RegisterMiscellaneous($"<b>{forcePrey.Unit.Name}</b> starts by shoving one {(LogUtilities.ActorHumanoid(forcePrey.Unit) ? "arm" : "forelimb")} up <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> ass, then another. Inch by inch {LogUtilities.GPPHe(forcePrey.Unit)} vigorously squeez{LogUtilities.EsIfSingular(forcePrey.Unit)} {LogUtilities.GPPHimself(forcePrey.Unit)} into the anal depths.");
                 AddToStomach(preyref, 1f);
                 break;
             case PreyLocation.breasts:
-                TacticalUtilities.Log.RegisterMiscellaneous($"In just a few deft movements, <b>{forcePrey.Unit.Name}</b> crams {LogUtilities.GPPHimself(forcePrey.Unit)} into <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> tits.");
+                //TacticalUtilities.Log.RegisterMiscellaneous($"In just a few deft movements, <b>{forcePrey.Unit.Name}</b> crams {LogUtilities.GPPHimself(forcePrey.Unit)} into <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> tits.");
                 var data = Races.GetRace(unit.Race);
                 if (data.ExtendedBreastSprites)
                 {
@@ -3614,10 +3615,11 @@ public class PredatorComponent
                 break;
             default:
                 State.GameManager.SoundManager.PlaySwallow(PreyLocation.stomach, actor);
-                TacticalUtilities.Log.RegisterMiscellaneous($"At {LogUtilities.GPPHis(forcePrey.Unit)} first glimpse of the {(LogUtilities.ActorHumanoid(unit) ? "warrior's" : "beast's")} maw, <b>{forcePrey.Unit.Name}</b> dives right down {LogUtilities.GPPHis(unit)} gullet. One swallow reflex later, <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> belly has been filled.");
+                //TacticalUtilities.Log.RegisterMiscellaneous($"At {LogUtilities.GPPHis(forcePrey.Unit)} first glimpse of the {(LogUtilities.ActorHumanoid(unit) ? "warrior's" : "beast's")} maw, <b>{forcePrey.Unit.Name}</b> dives right down {LogUtilities.GPPHis(unit)} gullet. One swallow reflex later, <b>{LogUtilities.ApostrophizeWithOrWithoutS(unit.Name)}</b> belly has been filled.");
                 AddToStomach(preyref, 1f);
                 break;
         }
+        TacticalUtilities.Log.RegisterForcefeed(forcePrey.Unit, unit, preyLocation);
         AddPrey(preyref);
         actor.SetPredMode(preyLocation);
         actor.SetVoreSuccessMode();
