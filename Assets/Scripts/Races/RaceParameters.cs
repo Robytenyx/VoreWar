@@ -101,6 +101,7 @@ static class RaceParameters
     static readonly RaceTraits Salix;
     static readonly RaceTraits FeralHorses;
     static readonly RaceTraits Abakhanskya;
+    static readonly RaceTraits Bella;
 
     static Unit tempUnit;
 
@@ -320,6 +321,8 @@ static class RaceParameters
                 return FeralHorses;
             case Race.Abakhanskya:
                 return Abakhanskya;
+            case Race.Bella:
+                return Bella;
             case (Race)700: //Singled out so that it doesn't make the debug message
                 return Default;
             case (Race)701:
@@ -2732,6 +2735,43 @@ static class RaceParameters
                 Traits.HeavyPounce,
         },
             RaceDescription = "Abakhanskya is an ancient dragoness hailing from another realm.  Despite this fact, she has been here for generations upon generations and has quite the body to show for it, absolutely brimming with the nutrients stolen from countless prey throughout the years.  She is an unstoppable force of predatory nature, it is unwise to face her on fair terms.",
+        };
+
+
+        Bella = new RaceTraits()
+        {
+            BodySize = 20,
+            StomachSize = 15,
+            FavoredStat = Stat.Endurance,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.Anal},
+            ExpMultiplier = 1.2f,
+            PowerAdjustment = 1.2f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(6, 10),
+                Dexterity = new RaceStats.StatRange(10, 15),
+                Endurance = new RaceStats.StatRange(25, 30),
+                Mind = new RaceStats.StatRange(15, 20),
+                Will = new RaceStats.StatRange(20, 25),
+                Agility = new RaceStats.StatRange(10, 15),
+                Voracity = new RaceStats.StatRange(20, 25),
+                Stomach = new RaceStats.StatRange(15, 20),
+            },
+            RacialTraits = new List<Traits>()
+            {
+                Traits.Tenacious,
+                Traits.Resilient,
+                Traits.EfficientGuts,
+                Traits.SteadyStomach,
+                Traits.ThrillSeeker,
+                Traits.ArcaneMagistrate,
+                Traits.ManaRich,
+                Traits.SpellBlade,
+                Traits.Clumsy
+            },
+            InnateSpells = new List<SpellTypes>()
+            { SpellTypes.Mending, SpellTypes.Fireball},
+            RaceDescription = "\"A shy cowgirl ^o^\" - Made by AgentAmbi",
         };
 
     }

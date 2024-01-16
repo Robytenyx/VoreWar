@@ -945,11 +945,14 @@ public class TacticalMessageLog
         if (SimpleText)
             return $"With a loud grunt, <b>{action.Unit.Name}</b> pushes <b>{action.Target.Name}</b> from {GPPHis(action.Unit)} womb, and breathes a sigh of relief.{action.Odds}";
         List<string> possibleLines = new List<string>();
-        possibleLines.Add($"With {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} body partially dissolved, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body takes this opportunity to rewrite {ApostrophizeWithOrWithoutS($"<b>{action.Prey.Name}</b>")} worldview and genetics, before allowing the brand new {GetRaceDescSingl(action.Prey)} back out.");
-        possibleLines.Add($"<b>{action.Prey.Name}</b> is released from inside {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body, though now as {RaceArticleSingular(action.Prey.Race)}.");
-        possibleLines.Add($"As <b>{action.Prey.Name}</b> is released from <b>{action.Unit.Name}</b>, {GPPHe(action.Prey)} look{SIfSingular(action.Prey)} at {GPPHimself(action.Prey)}, and note that {GPPHeIs(action.Prey)} now {RaceArticleSingular(action.Prey.Race)}.");
-        possibleLines.Add($"{Capitalize(RaceArticleSingular(action.Prey.Race))} is expelled from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body, the brand new form of <b>{action.Prey.Name}</b>.");
-        possibleLines.Add($"<b>{action.Prey.Name}</b> emerges from <b>{action.Unit.Name}</b> changed into {RaceArticleSingular(action.Prey.Race)}.");
+        possibleLines.Add($"With {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} body partially dissolved, {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body takes this opportunity to rewrite {ApostrophizeWithOrWithoutS($"<b>{action.Target.Name}</b>")} worldview{(action.Extra == "rebirth" ? "and genetics": "")} before allowing the brand new {GetRaceDescSingl(action.Target)} back out.");
+        possibleLines.Add($"<b>{action.Target.Name}</b> is released from inside {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body{(action.Extra == "rebirth" ? $", though now as {RaceArticleSingular(action.Target.Race)}" : "")}.");
+        if (action.Extra == "rebirth")
+        {
+            possibleLines.Add($"As <b>{action.Target.Name}</b> is released from <b>{action.Unit.Name}</b>, {GPPHe(action.Target)} look{SIfSingular(action.Target)} at {GPPHimself(action.Target)}, and note that {GPPHeIs(action.Target)} now {RaceArticleSingular(action.Target.Race)}.");
+            possibleLines.Add($"{Capitalize(RaceArticleSingular(action.Target.Race))} is expelled from {ApostrophizeWithOrWithoutS($"<b>{action.Unit.Name}</b>")} body, the brand new form of <b>{action.Target.Name}</b>.");
+            possibleLines.Add($"<b>{action.Target.Name}</b> emerges from <b>{action.Unit.Name}</b> changed into {RaceArticleSingular(action.Target.Race)}.");
+        }
         return GetRandomStringFrom(possibleLines.ToArray());
     }
     private string GenerateCumGestationMessage(EventLog action)

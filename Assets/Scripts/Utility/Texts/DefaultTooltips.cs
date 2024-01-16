@@ -483,13 +483,13 @@ Note that the snow tileset has no water";
             case 183:
                 return @"Controls how scattered the water that exists is.   All the way to the left will result in many small pools and lakes, while all the way to the right will generally result in 1 or 2 big lakes, though it's scattered enough that there might not even be one on the map";
             case 184:
-                return "Traits in here will be automatically added to leaders when created\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
+                return "This list of traits will automatically be added to all leader units of any race.\nMultiple traits can be added, separated by a comma.\n(e.g. \"Eternal, Large\" will give all leader units the Eternal and Large traits.)\nTo verify traits were entered correctly, save then reopen the Content Settings; only correctly entered traits will remain in the text field.";
             case 185:
-                return "Traits in here will be automatically added to all males of any race\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
+                return "This list of traits will automatically be added to all male units of any race.\nMultiple traits can be added, separated by a comma.\n(e.g. \"Eternal, Large\" will give all male units the Eternal and Large traits.)\nTo verify traits were entered correctly, save then reopen the Content Settings; only correctly entered traits will remain in the text field.";
             case 186:
-                return "Traits in here will be automatically added to all females of any race\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
+                return "This list of traits will automatically be added to all female units of any race.\nMultiple traits can be added, separated by a comma.\n(e.g. \"Eternal, Large\" will give all female units the Eternal and Large traits.)\nTo verify traits were entered correctly, save then reopen the Content Settings; only correctly entered traits will remain in the text field.";
             case 187:
-                return "Traits in here will be automatically added to all herms of any race\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
+                return "This list of traits will automatically be added to all herm units of any race.\nMultiple traits can be added, separated by a comma.\n(e.g. \"Eternal, Large\" will give all herm units the Eternal and Large traits.)\nTo verify traits were entered correctly, save then reopen the Content Settings; only correctly entered traits will remain in the text field.";
             case 188:
                 return "AI to AI relations are locked, diplomacy will only change to and from players.  Useful if you want to group the ai into teams and have them stay that way while still having a flexible player";
             case 189:
@@ -696,6 +696,10 @@ Does not retroactively affect already created units.";
                 return "The amount your sight is decreased at night in strategic mode if Fog of War is also on.\nThis value is subtracted from the 'Fog Distace Slider'.\n If this is higher than 'Fog Distace Slider' you won't be able to see at all";
             case 279:
                 return "The tactical turn where every unit is revealed.";
+            case 280:
+                return "Affects how likely a Unit will gain weight during absorption. 1 = 100% chance.";
+            case 281:
+                return "This list of traits will automatically be added to all spawn units.\nMultiple traits can be added, separated by a comma.\n(e.g. \"Eternal, Large\" will give all spawn units the Eternal and Large traits.)\nTo verify traits were entered correctly, save then reopen the Content Settings; only correctly entered traits will remain in the text field.";
             default:
                 return "";
         }

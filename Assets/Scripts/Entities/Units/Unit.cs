@@ -830,6 +830,11 @@ public class Unit
             Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.AbaWeapon);
             Items[1] = State.World.ItemRepository.GetSpecialItem(SpecialItems.AbaArmor);
         }
+        else if (race == Race.Bella)
+        {
+            FixedGear = true;
+            Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.BellaWeapon);
+        }
         else
         {
             FixedGear = false;
