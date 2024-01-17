@@ -689,13 +689,13 @@ static class TacticalUtilities
 
     static internal Actor_Unit FindUnitToResurrect(Actor_Unit caster)
     {
-        Actor_Unit actor = Units.Where(s => s.Unit.Side == caster.Unit.Side && s.Unit.IsDead && s.Unit.Type != UnitType.Summon && !s.Unit.Annihilated).OrderByDescending(s => s.Unit.Experience).FirstOrDefault();
+        Actor_Unit actor = Units.Where(s => s.Unit.Side == caster.Unit.Side && s.Unit.IsDead && s.Unit.Type != UnitType.Summon && s.Unit.Level > 0).OrderByDescending(s => s.Unit.Experience).FirstOrDefault();
         return actor;
     }
 
     static internal Actor_Unit FindUnitToReanimate(Actor_Unit caster)
     {
-        Actor_Unit actor = Units.Where(s => s.Unit.IsDead).OrderByDescending(s => s.Unit.Experience).FirstOrDefault();
+        Actor_Unit actor = Units.Where(s => s.Unit.IsDead && s.Unit.Level > 0).OrderByDescending(s => s.Unit.Experience).FirstOrDefault();
         return actor;
     }
 
@@ -707,7 +707,7 @@ static class TacticalUtilities
         {
             UnityEngine.Object.Destroy(UnitPickerUI.ActorFolder.transform.GetChild(i).gameObject);
         }
-        Actor_Unit[] list = Units.Where(s => s.Unit.Side == side && s.Unit.IsDead && s.Unit.Type != UnitType.Summon).OrderByDescending(s => s.Unit.Experience).ToArray();
+        Actor_Unit[] list = Units.Where(s => s.Unit.Side == side && s.Unit.IsDead && s.Unit.Type != UnitType.Summon && s.Unit.Level > 0).OrderByDescending(s => s.Unit.Experience).ToArray();
         foreach (Actor_Unit actorUnit in list)
         {
             Unit unit = actorUnit.Unit;
@@ -785,7 +785,7 @@ static class TacticalUtilities
         {
             UnityEngine.Object.Destroy(UnitPickerUI.ActorFolder.transform.GetChild(i).gameObject);
         }
-        Actor_Unit[] list = Units.Where(s => s.Unit.IsDead).OrderByDescending(s => s.Unit.Experience).ToArray();
+        Actor_Unit[] list = Units.Where(s => s.Unit.IsDead && s.Unit.Level > 0).OrderByDescending(s => s.Unit.Experience).ToArray();
         foreach (Actor_Unit actor in list)
         {
             GameObject obj = UnityEngine.Object.Instantiate(UnitPickerUI.HiringUnitPanel, UnitPickerUI.ActorFolder);
@@ -1067,33 +1067,84 @@ static class TacticalUtilities
 
     internal static void ShapeshifterPanel(Actor_Unit selectedUnit)
     {
-        //int children = UnitPickerUI.ActorFolder.transform.childCount;
-        //for (int i = children - 1; i >= 0; i--)
-        //{
-        //    UnityEngine.Object.Destroy(UnitPickerUI.ActorFolder.transform.GetChild(i).gameObject);
-        //}
-        //foreach (Unit shape in selectedUnit.Unit.ShifterShapes)
-        //{
-        //    GameObject obj = UnityEngine.Object.Instantiate(UnitPickerUI.HiringUnitPanel, UnitPickerUI.ActorFolder);
-        //    UIUnitSprite sprite = obj.GetComponentInChildren<UIUnitSprite>();
-        //    Actor_Unit actor = new Actor_Unit(new Vec2i(0, 0), shape);
-        //    sprite.UpdateSprites(actor);
-        //    Text text = obj.transform.GetChild(3).GetComponent<Text>();
-        //    text.text = 
-        //        $"Items: {shape.GetItem(0)?.Name} {shape.GetItem(1)?.Name}" + (shape.HasTrait(Traits.Resourceful) ? $" { shape.GetItem(2)?.Name}" : "") + "\n" +
-        //        $"Str: {shape.GetStatBase(Stat.Strength)} Dex: {shape.GetStatBase(Stat.Dexterity)} Agility: {shape.GetStatBase(Stat.Agility)}\n" +
-        //        $"Mind: {shape.GetStatBase(Stat.Mind)} Will: {shape.GetStatBase(Stat.Will)} Endurance: {shape.GetStatBase(Stat.Endurance)}\n";
-        //    if (shape.Predator)
-        //        text.text += $"Vore: {shape.GetStatBase(Stat.Voracity)} Stomach: {shape.GetStatBase(Stat.Stomach)}";
-        //    sprite.Name.text = InfoPanel.RaceSingular(shape);
-        //    Button button = obj.GetComponentInChildren<Button>();
-        //    button.GetComponentInChildren<Text>().text = "Transform";
-        //    button.onClick.AddListener(() => selectedUnit.Shapeshift(shape));
-        //    button.onClick.AddListener(() => UnitPickerUI.gameObject.SetActive(false));
-        //}
-        //UnitPickerUI.ActorFolder.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 300 * (1 + (selectedUnit.Unit.ShifterShapes.Count / 3)));
-        //UnitPickerUI.GetComponentInChildren<HirePanel>().GetComponentInChildren<Button>().GetComponentInChildren<Text>().text = "Cancel";
-        //UnitPickerUI.gameObject.SetActive(true);
+        selectedUnit.Unit.UpdateShapeExpAndItems();
+        ShapeUtils.UpdateShapeTree(selectedUnit.Unit);
+        int children = UnitPickerUI.ActorFolder.transform.childCount;
+        for (int i = children - 1; i >= 0; i--)
+        {
+            UnityEngine.Object.Destroy(UnitPickerUI.ActorFolder.transform.GetChild(i).gameObject);
+        }
+        foreach (Unit unit in selectedUnit.Unit.ShifterShapes)
+        {
+            GameObject obj = GameObject.Instantiate(UnitPickerUI.ShapesPanel, UnitPickerUI.ActorFolder);
+            UIUnitSprite sprite = obj.GetComponentInChildren<UIUnitSprite>();
+            Actor_Unit actor = new Actor_Unit(new Vec2i(0, 0), unit);
+            //Text text = obj.transform.GetChild(3).GetComponent<Text>();
+            Text GenderText = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
+            Text EXPText = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+            GameObject EquipRow = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(2).gameObject;
+            GameObject StatRow1 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(3).gameObject;
+            GameObject StatRow2 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(4).gameObject;
+            GameObject StatRow3 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(5).gameObject;
+            GameObject StatRow4 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(6).gameObject;
+            Text TraitList = obj.transform.GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
+
+            string gender;
+            if (actor.Unit.GetGender() != Gender.None)
+            {
+                if (actor.Unit.GetGender() == Gender.Hermaphrodite)
+                    gender = "Herm";
+                else
+                    gender = actor.Unit.GetGender().ToString();
+                GenderText.text = $"{gender}";
+            }
+            EXPText.text = $"Level {unit.Level} ({(int)unit.Experience} EXP)";
+            if (actor.Unit.HasTrait(Traits.Resourceful))
+            {
+                EquipRow.transform.GetChild(2).gameObject.SetActive(true);
+                EquipRow.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = unit.GetItem(0)?.Name;
+                EquipRow.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = unit.GetItem(1)?.Name;
+                EquipRow.transform.GetChild(2).GetChild(0).GetComponent<Text>().text = unit.GetItem(2)?.Name;
+            }
+            else
+            {
+                EquipRow.transform.GetChild(2).gameObject.SetActive(false);
+                EquipRow.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = unit.GetItem(0)?.Name;
+                EquipRow.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = unit.GetItem(1)?.Name;
+            }
+            StatRow1.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Strength).ToString();
+            StatRow1.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Dexterity).ToString();
+            StatRow2.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Mind).ToString();
+            StatRow2.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Will).ToString();
+            StatRow3.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Endurance).ToString();
+            StatRow3.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Agility).ToString();
+            if (actor.PredatorComponent != null)
+            {
+                StatRow4.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Voracity).ToString();
+                StatRow4.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = unit.GetStatBase(Stat.Stomach).ToString();
+            }
+            else
+                StatRow4.SetActive(false);
+            TraitList.text = RaceEditorPanel.TraitListToText(unit.GetTraits, true).Replace(", ", "\n");
+            //text.text += $"STR: {unit.GetStatBase(Stat.Strength)} DEX: { unit.GetStatBase(Stat.Dexterity)}\n" +
+            //    $"MND: {unit.GetStatBase(Stat.Mind)} WLL: { unit.GetStatBase(Stat.Will)} \n" +
+            //    $"END: {unit.GetStatBase(Stat.Endurance)} AGI: {unit.GetStatBase(Stat.Agility)}\n";
+            //if (actor.PredatorComponent != null)
+            //    text.text += $"VOR: {unit.GetStatBase(Stat.Voracity)} STM: { unit.GetStatBase(Stat.Stomach)}";
+            actor.UpdateBestWeapons();
+            sprite.UpdateSprites(actor);
+            sprite.Name.text = unit.Name;
+            Button[] buttons = obj.GetComponentsInChildren<Button>();
+            buttons[0].GetComponentInChildren<Text>().text = "Transform";
+            buttons[0].onClick.AddListener(() => selectedUnit.Shapeshift(unit));
+            buttons[0].onClick.AddListener(() => UnitPickerUI.gameObject.SetActive(false));
+            buttons[1].GetComponentInChildren<Text>().text = "Discard";
+            buttons[1].onClick.AddListener(() => ShapeUtils.RemoveShape(selectedUnit.Unit,unit));
+            buttons[1].onClick.AddListener(() => obj.SetActive(false));
+        }
+        UnitPickerUI.ActorFolder.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 300 * (1 + (children) / 3));
+        UnitPickerUI.GetComponentsInChildren<Button>().Last().GetComponentInChildren<Text>().text = "Cancel";
+        UnitPickerUI.gameObject.SetActive(true);
     }
 
     internal static bool IsPreyEndoTargetForUnit(Prey preyUnit, Unit unit)

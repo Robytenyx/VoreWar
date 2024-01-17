@@ -322,14 +322,14 @@ public enum Traits
     GrassImpedence = 161,
     /// <summary>When this unit is absorbed, it passes on all traits listed below "Donor" to the predator.</summary>
     Donor = 163,
-    /// <summary>Gives the ability to change into different races after acquiring them via absorbing, being reborn, reincarnating, or infiltrating.</summary>
-    //Shapeshifter = 164,
+    /// <summary>Gives the ability to change into different races after acquiring them via absorbing, being reborn, ór reincarnating. </summary>
+    Shapeshifter = 164,
     /// <summary>When this unit would equip a book, it is instead consumed and the spell becomes innate.</summary>
     BookEater = 165,
     /// <summary>Allows attempting to join an army by being the only attacker. Chance is affected by this unit's Mind stat as well as the highest Will stat among enemies.</summary>
     //SupernaturalPersuasion = 166,
-    /// <summary>Like Shapeshifter, only that the forms can be specific people, including their individual traits. These get swapped out only through player input</summary>
-    //Skinwalker = 167,
+    /// <summary>Like Shapeshifter, only that the forms can be specific people, including their individual traits. Absorbtion won't acquire forms beyond the first to avoid clutter (though unneeded forms can be discarded).</summary>
+    Skinwalker = 167,
     /// <summary>When eaten, Predator is afflicted by Prey's curse, and has a chance to be charmed each round</summary>
     Whispers = 168,
     /// <summary>While digesting, Prey deals damage to predator</summary>
@@ -354,7 +354,12 @@ public enum Traits
     ViralDigestion = 178,
     /// <summary>This unit has a very strange body type, making them harder to swallow and providing less sustenance as prey.</summary>
     AwkwardShape = 179,
-
+    /// <summary>Allows unit to use <b>Summon</b>, once per battle</summary>
+    Summoner = 180,
+    /// <summary>Allows unit to use <b>Polymorph</b>, once per battle</summary>
+    Polymorph = 181,
+    /// <summary>Unit can only cock vore or unbirth pery if the prey is 1/3 the size of this unit, but Diminishment does not fade while prey is inside this unit's cock or womb.</summary>
+    TightNethers = 182,
 
 
 
@@ -378,6 +383,8 @@ public enum Traits
     ForcedMetamorphosis = 207,
     /// <summary>Unit changes Race and side upon digestion</summary>
     MetamorphicConversion = 208,
+    TrueChangeling = 209,
+    /// <summary>Changing will keep preys form upon absorption</summary>
 
 
     //Hidden Cheat Traits
@@ -394,9 +401,6 @@ public enum Traits
     /// <summary>Units soul continues to possess pred after death</summary>
     SpiritPossession = 355,
 
-
-    /// <summary>Unit can only cock vore or unbirth pery if the prey is 1/3 the size of this unit, but Diminishment does not fade while prey is inside this unit's cock or womb.</summary>
-    TightNethers,
 
 
     //Everything after this is a cheat trait
@@ -497,8 +501,8 @@ static class TraitsMethods
             case Traits.Metamorphosis:
             case Traits.Changeling:
             case Traits.GreaterChangeling:
-            //case Traits.Shapeshifter:
-            //case Traits.Skinwalker:
+            case Traits.Shapeshifter:
+            case Traits.Skinwalker:
                 return true;
             default:
                 return false;

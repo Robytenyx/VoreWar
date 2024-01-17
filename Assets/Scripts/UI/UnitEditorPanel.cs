@@ -425,14 +425,30 @@ public class UnitEditorPanel : CustomizerPanel
         if (State.RandomizeLists.Any(rl => rl.name == TraitDropdown.options[TraitDropdown.value].text))
         {
             RandomizeList randomizeList = State.RandomizeLists.Single(rl => rl.name == TraitDropdown.options[TraitDropdown.value].text);
-            var resTraits = UnitEditor.Unit.RandomizeOne(randomizeList);
-            foreach (Traits resTrait in resTraits)
-            {
-                UnitEditor.AddTrait(resTrait);
-                if (resTrait == Traits.Resourceful || resTrait == Traits.BookWormI || resTrait == Traits.BookWormII || resTrait == Traits.BookWormIII)
+             if (randomizeList.level > UnitEditor.Unit.Level)
                 {
-                    UnitEditor.Unit.SetMaxItems();
-                    PopulateItems();
+                    UnitEditor.Unit.AddPermanentTrait((Traits)randomizeList.id);
+                } else
+                {
+                List<Traits> resTraitsNp;
+                var resTraits = UnitEditor.Unit.RandomizeOne(randomizeList, out resTraitsNp);
+                foreach (Traits resTrait in resTraits)
+                {
+                    UnitEditor.AddTrait(resTrait);
+                    if (resTrait == Traits.Resourceful || resTrait == Traits.BookWormI || resTrait == Traits.BookWormII || resTrait == Traits.BookWormIII)
+                    {
+                        UnitEditor.Unit.SetMaxItems();
+                        PopulateItems();
+                    }
+                }
+                foreach (Traits resTraitNp in resTraitsNp)
+                {
+                    UnitEditor.AddTrait(resTraitNp, false);
+                    if (resTraitNp == Traits.Resourceful || resTraitNp == Traits.BookWormI || resTraitNp == Traits.BookWormII || resTraitNp == Traits.BookWormIII)
+                    {
+                        UnitEditor.Unit.SetMaxItems();
+                        PopulateItems();
+                    }
                 }
             }
             UnitEditor.RefreshActor();
@@ -473,11 +489,21 @@ public class UnitEditorPanel : CustomizerPanel
         {
             if (TraitsText.text.ToLower().Contains(rl.name.ToString().ToLower()))
             {
-                var resTraits = UnitEditor.Unit.RandomizeOne(rl);
+                List<Traits> resTraitsNp;
+                var resTraits = UnitEditor.Unit.RandomizeOne(rl, out resTraitsNp);
                 foreach (Traits resTrait in resTraits)
                 {
                     UnitEditor.AddTrait(resTrait);
                     if (resTrait == Traits.Resourceful || resTrait == Traits.BookWormI || resTrait == Traits.BookWormII || resTrait == Traits.BookWormIII)
+                    {
+                        UnitEditor.Unit.SetMaxItems();
+                        PopulateItems();
+                    }
+                }
+                foreach (Traits resTraitNp in resTraitsNp)
+                {
+                    UnitEditor.AddTrait(resTraitNp, false);
+                    if (resTraitNp == Traits.Resourceful || resTraitNp == Traits.BookWormI || resTraitNp == Traits.BookWormII || resTraitNp == Traits.BookWormIII)
                     {
                         UnitEditor.Unit.SetMaxItems();
                         PopulateItems();
@@ -509,6 +535,19 @@ public class UnitEditorPanel : CustomizerPanel
     {
         if (UnitEditor.Unit == null)
             return;
+
+        RandomizeList rList = State.RandomizeLists.Where(rl => rl.name == TraitDropdown.options[TraitDropdown.value].text).FirstOrDefault();
+        if (rList != null)
+        {
+            UnitEditor.RemoveTrait((Traits)rList.id);
+            UnitEditor.RefreshActor();
+            TraitList.text = UnitEditor.Unit.ListTraits();
+            if ((Traits)rList.id == Traits.Resourceful)
+            {
+                UnitEditor.Unit.SetMaxItems();
+                PopulateItems();
+            }
+        }
 
         if (Enum.TryParse(TraitDropdown.options[TraitDropdown.value].text, out Traits trait))
         {

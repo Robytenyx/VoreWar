@@ -2,6 +2,7 @@
 using OdinSerializer;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using UnityEngine;
 
 public class Actor_Unit
@@ -326,6 +327,16 @@ public class Actor_Unit
         ReloadSpellTraits();
     }
 
+    internal bool SpendModifiedMana(int amount)
+    {
+        int ModifiedManaCost = amount + (amount * (Unit.GetStatusEffect(StatusEffectType.SpellForce) != null ? Unit.GetStatusEffect(StatusEffectType.SpellForce).Duration / 10 : 0));
+        if (Unit.SpendMana(ModifiedManaCost))
+        {
+            return true;
+        }
+        return false;
+    }
+
     public void ReloadSpellTraits()
     {
         Unit.SingleUseSpells = new List<SpellTypes>();
@@ -380,6 +391,16 @@ public class Actor_Unit
             Unit.SingleUseSpells.Add(SpellList.Bind.SpellType);
             Unit.UpdateSpells();
         }
+        if (Unit.HasTrait(Traits.Summoner) && State.World?.ItemRepository != null) //protection for the create strat screen
+        {
+            Unit.SingleUseSpells.Add(SpellList.Summon.SpellType);
+            Unit.UpdateSpells();
+        }
+        if (Unit.HasTrait(Traits.Polymorph) && State.World?.ItemRepository != null) //protection for the create strat screen
+        {
+            Unit.SingleUseSpells.Add(SpellList.Polymorph.SpellType);
+            Unit.UpdateSpells();
+        }
         // Multi-use section
         if (Unit.HasTrait(Traits.ForceFeeder) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
@@ -406,7 +427,7 @@ public class Actor_Unit
 
     public void GenerateSpritePrefab(Transform folder)
     {
-        UnitSprite = Object.Instantiate(State.GameManager.UnitBase, new Vector3(Position.x, Position.y), new Quaternion(), folder).GetComponent<UnitSprite>();
+        UnitSprite = UnityEngine.Object.Instantiate(State.GameManager.UnitBase, new Vector3(Position.x, Position.y), new Quaternion(), folder).GetComponent<UnitSprite>();
         UnitSprite.UpdateHealthBar(this);
     }
 
@@ -772,6 +793,10 @@ public class Actor_Unit
 
     internal float GetMagicChance(Actor_Unit attacker, Spell currentSpell, float modifier = 0, Stat stat = Stat.Mind)
     {
+        if ((currentSpell?.AcceptibleTargets.Contains(AbilityTargets.Ally) ?? false) && attacker.Unit.GetApparentSide(Unit) == Unit.FixedSide)
+        {
+            return 1;
+        }
         if (TacticalUtilities.SneakAttackCheck(attacker.Unit, Unit)) // sneakAttack
         {
             modifier -= 0.3f;
@@ -1174,7 +1199,7 @@ public class Actor_Unit
         {
             if (State.GameManager.TacticalMode.TacticalSoundBlocked() == false)
             {
-                var obj = Object.Instantiate(State.GameManager.TacticalEffectPrefabList.ShunGokuSatsu);
+                var obj = UnityEngine.Object.Instantiate(State.GameManager.TacticalEffectPrefabList.ShunGokuSatsu);
                 obj.transform.SetPositionAndRotation(new Vector3(target.Position.x, target.Position.y), new Quaternion());
                 MiscUtilities.DelayedInvoke(() => State.GameManager.SoundManager.PlayArrowHit(null), .06f);
                 MiscUtilities.DelayedInvoke(() => State.GameManager.SoundManager.PlayMeleeHit(null), .12f);
@@ -1358,7 +1383,7 @@ public class Actor_Unit
                         StatusEffect charm = target.Unit.GetStatusEffect(StatusEffectType.Charmed);
                         if (charm != null)
                         {
-                            target.Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
+                            target.Unit.RemoveStatus(charm);                // betrayal dispels charm
                         }
                     }
                     Unit.GiveScaledExp(2 * target.Unit.ExpMultiplier, Unit.Level - target.Unit.Level);
@@ -1432,7 +1457,7 @@ public class Actor_Unit
                         StatusEffect charm = target.Unit.GetStatusEffect(StatusEffectType.Charmed);
                         if (charm != null)
                         {
-                            target.Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
+                            target.Unit.RemoveStatus(charm);                // betrayal dispels charm
                         }
                     }
                     CreateHitEffects(target);
@@ -1478,7 +1503,7 @@ public class Actor_Unit
         if (target.Unit.Race == Race.Asura)
             Unit.EarnedMask = true;
         Unit.EnemiesKilledThisBattle++;
-        target.Unit.KilledBy = Unit;
+        target.Unit.RelatedUnits[SingleUnitContext.KilledBy] = Unit;
         target.Unit.Kill();
         if (Unit.HasTrait(Traits.KillerKnowledge) && Unit.KilledUnits % 4 == 0)
             Unit.GeneralStatIncrease(1);
@@ -1496,7 +1521,7 @@ public class Actor_Unit
         if (target.Unit.Race == Race.Asura)
             Unit.EarnedMask = true;
         Unit.EnemiesKilledThisBattle++;
-        target.Unit.KilledBy = Unit;
+        target.Unit.RelatedUnits[SingleUnitContext.KilledBy] = Unit;
         target.Unit.Kill();
         if (Unit.HasTrait(Traits.KillerKnowledge) && Unit.KilledUnits % 4 == 0)
             Unit.GeneralStatIncrease(1);
@@ -1569,7 +1594,7 @@ public class Actor_Unit
                 StatusEffect charm = Unit.GetStatusEffect(StatusEffectType.Charmed);
                 if (charm != null)
                 {
-                    Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
+                    Unit.RemoveStatus(charm);                // betrayal dispels charm
                 }
             }
             if (attacker.Unit.HasTrait(Traits.ArcaneMagistrate))
@@ -1707,7 +1732,11 @@ public class Actor_Unit
     //This is the chance to be devoured, so it belongs here and not in PredatorComponent
     public float GetDevourChance(Actor_Unit attacker, bool includeSecondaries = false, int skillBoost = 0, bool force = false)
     {
-        if (attacker?.Unit.Predator == false && !force)
+        if (attacker?.Unit == null)
+        {
+            return 0;
+        }
+        if (attacker.Unit.Predator == false && !force)
         {
             return 0;
         }
@@ -1826,7 +1855,7 @@ public class Actor_Unit
         if ((target.Unit.GetApparentSide() != Unit.GetApparentSide() && target.Unit.GetApparentSide() != Unit.FixedSide) && !(Unit.HasTrait(Traits.SeductiveTouch) || Config.CanUseStomachRubOnEnemies || TacticalUtilities.GetMindControlSide(Unit) != -1))
             return false;
         target.ReceivedRub = true;
-        int index = Random.Range(0, possible.Count - 1);
+        int index = UnityEngine.Random.Range(0, possible.Count - 1);
         type = possible[index];
         switch (type)
         {
@@ -2564,7 +2593,7 @@ public class Actor_Unit
         var spell = SpellList.Bind;
         if (t.Unit.Type != UnitType.Summon)
             return false;
-        var binder = TacticalUtilities.Units.Where(a => a.Unit.BoundUnit?.Unit == t.Unit).FirstOrDefault();
+        var binder = TacticalUtilities.Units.Where(a => a.Unit.RelatedUnits[SingleUnitContext.BoundUnit] == t.Unit).FirstOrDefault();
         if (binder?.Unit.FixedSide == Unit.FixedSide) return false;
         if (Unit.SpendMana(spell.ManaCost) == false && spell.IsFree != true) return false;
 
@@ -2579,8 +2608,8 @@ public class Actor_Unit
             {
                 State.GameManager.SoundManager.PlaySpellCast(spell, this);
                 State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"With {LogUtilities.GPPHis(Unit)} superior magic <b>{Unit.Name}</b> wrests control over the summoned {InfoPanel.RaceSingular(t.Unit)} from <b>{binder.Unit.Name}</b>.");
-                binder.Unit.BoundUnit = null;
-                Unit.BoundUnit = t;
+                binder.Unit.RelatedUnits[SingleUnitContext.BoundUnit] = null;
+                Unit.RelatedUnits[SingleUnitContext.BoundUnit] = t.Unit;
 
                 if (t.Unit.Side != Unit.Side) State.GameManager.TacticalMode.SwitchAlignment(t);
                 if (!t.Unit.HasTrait(Traits.Untamable))
@@ -2599,11 +2628,11 @@ public class Actor_Unit
                 if (outcome == 3)
                 {
                     State.GameManager.SoundManager.PlayMisc("unbound", this);
-                    var obj = Object.Instantiate(State.GameManager.TacticalEffectPrefabList.ShunGokuSatsu);
+                    var obj = UnityEngine.Object.Instantiate(State.GameManager.TacticalEffectPrefabList.ShunGokuSatsu);
                     obj.transform.SetPositionAndRotation(new Vector3(t.Position.x, t.Position.y), new Quaternion());
                     State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"Suddenly, there is a flash of light and both casters stagger for a moment. What happened?.");
                     t.Unit.Type = UnitType.Adventurer;
-                    binder.Unit.BoundUnit = null;
+                    binder.Unit.RelatedUnits[SingleUnitContext.BoundUnit] = null;
                     t.Unit.Name += " The Unbound";
                     t.Unit.AddPermanentTrait(Traits.PeakCondition);
                     int unusedSide = 703;
@@ -2628,8 +2657,8 @@ public class Actor_Unit
                 {
                     State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"...But it looks like the Binding spell worked after all.");
                     State.GameManager.SoundManager.PlaySpellCast(spell, this);
-                    binder.Unit.BoundUnit = null;
-                    Unit.BoundUnit = t;
+                    binder.Unit.RelatedUnits[SingleUnitContext.BoundUnit] = null;
+                    Unit.RelatedUnits[SingleUnitContext.BoundUnit] = t.Unit;
 
                     if (t.Unit.Side != Unit.Side) State.GameManager.TacticalMode.SwitchAlignment(t);
                     if (!t.Unit.HasTrait(Traits.Untamable))
@@ -2649,7 +2678,7 @@ public class Actor_Unit
                 else if (outcome == 0)
                 {
                     State.GameManager.SoundManager.PlayMisc("unbound", this);
-                    var obj = Object.Instantiate(State.GameManager.TacticalEffectPrefabList.ShunGokuSatsu);
+                    var obj = UnityEngine.Object.Instantiate(State.GameManager.TacticalEffectPrefabList.ShunGokuSatsu);
                     obj.transform.SetPositionAndRotation(new Vector3(t.Position.x, t.Position.y), new Quaternion());
                     State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"Suddenly, there is a flash of light and both casters stagger for a moment. What happened?.");
                     t.Unit.Type = UnitType.Adventurer;
@@ -2665,7 +2694,7 @@ public class Actor_Unit
         {
             State.GameManager.SoundManager.PlaySpellCast(spell, this);
 
-            Unit.BoundUnit = t;
+            Unit.RelatedUnits[SingleUnitContext.BoundUnit] = t.Unit;
 
             if (t.Unit.Side != Unit.Side) State.GameManager.TacticalMode.SwitchAlignment(t);
             if (!t.Unit.HasTrait(Traits.Untamable))
@@ -2696,30 +2725,30 @@ public class Actor_Unit
     internal bool SummonBound(Vec2i l)
     {
         var spell = SpellList.Bind;
-        if (Unit.BoundUnit == null)
+        if (Unit.RelatedUnits[SingleUnitContext.BoundUnit] == null)
             return false;
 
-        if (TacticalUtilities.Units.Contains(Unit.BoundUnit) && !Unit.BoundUnit.Unit.IsDead)
+        if (TacticalUtilities.Units.Any(u => u.Unit == Unit.RelatedUnits[SingleUnitContext.BoundUnit]) && !Unit.RelatedUnits[SingleUnitContext.BoundUnit].IsDead)
             return false;
-        if (Unit.SpendMana(spell.ManaCost) == false && spell.IsFree != true) return false;
+        if (SpendModifiedMana(spell.ManaCost) == false && spell.IsFree != true) return false;
 
         State.GameManager.SoundManager.PlaySpellCast(SpellList.Summon, this);
 
-        if (TacticalUtilities.Units.Contains(Unit.BoundUnit))
+        if (TacticalUtilities.Units.Any(u => u.Unit == Unit.RelatedUnits[SingleUnitContext.BoundUnit]))
         {
-            TacticalUtilities.Reanimate(l, Unit.BoundUnit, Unit);
-            Unit.BoundUnit.Unit.Health = Unit.BoundUnit.Unit.MaxHealth;
+            TacticalUtilities.Reanimate(l, TacticalUtilities.Units.Find(u => u.Unit == Unit.RelatedUnits[SingleUnitContext.BoundUnit]), Unit);
+            Unit.RelatedUnits[SingleUnitContext.BoundUnit].Health = Unit.RelatedUnits[SingleUnitContext.BoundUnit].MaxHealth;
         }
         else
         {
-            StrategicUtilities.SpendLevelUps(Unit.BoundUnit.Unit);
-            var target = State.GameManager.TacticalMode.AddUnitToBattle(Unit.BoundUnit.Unit, l);
+            StrategicUtilities.SpendLevelUps(Unit.RelatedUnits[SingleUnitContext.BoundUnit]);
+            var target = State.GameManager.TacticalMode.AddUnitToBattle(Unit.RelatedUnits[SingleUnitContext.BoundUnit], l);
             target.Visible = true;
             target.Targetable = true;
             target.SelfPrey = null;
             target.Surrendered = false;
             target.Unit.Health = target.Unit.MaxHealth;
-            State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{Unit.Name}</b> re-summoned <b>{Unit.BoundUnit.Unit.Name}</b>.");
+            State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{Unit.Name}</b> re-summoned <b>{Unit.RelatedUnits[SingleUnitContext.BoundUnit].Name}</b>.");
         }
 
         if (Unit.TraitBoosts.SpellAttacks > 1)
@@ -2745,29 +2774,12 @@ public class Actor_Unit
         }
     }
 
-    public bool ChangeRaceAny(Unit template, bool permanent, bool isPrey)
+    public bool ChangeRaceAny(Unit template)
     {
-        if (Unit.HiddenRace == Unit.Race)
+        if (Unit.ShifterShapes.Contains(template))
         {
-            TacticalGraphicalEffects.CreateSmokeCloud(Position, Unit.GetScale() / 2);
-            Unit.HideRace(template.Race, template);
-            foreach (Traits trait in template.GetTraits)
-            {
-                if ((!Unit.HasTrait(trait) || Unit.HasSharedTrait(trait)) && !TraitsMethods.IsRaceModifying(trait))
-                    if (permanent)
-                        Unit.AddPermanentTrait(trait);
-                    else
-                        ShareTrait(trait, TraitsMethods.LastTrait());
-            }
-            AnimationController = new AnimationController();
-            Unit.ReloadTraits();
-            Unit.InitializeTraits();
-            ReloadSpellTraits();
-            State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{Unit.Name} shifted form to resemble {template.Name}");
-            Unit.FixedSide = Unit.Side;
-            Unit.Side = template.Side;
-            Unit.hiddenFixedSide = true;
-            PredatorComponent?.UpdateFullness();
+            ShapeUtils.UpdateShapeTree(Unit);
+            Shapeshift (template);
             return true;
         }
         return false;
@@ -2869,20 +2881,45 @@ public class Actor_Unit
     {
         if (Unit == shape)
             return;
-        TacticalGraphicalEffects.CreateSmokeCloud(Position, Unit.GetScale()/2);
-        Unit.UpdateShapeExpAndItems();
+        if (Visible)
+            TacticalGraphicalEffects.CreateSmokeCloud(Position, Unit.GetScale()/2);
         MiscUtilities.DelayedInvoke(() =>
         {
+            float healthPct = Unit.HealthPct;
             shape.ShifterShapes = Unit.ShifterShapes;
-            shape.Side = Unit.Side;
+            shape.FixedSide = Unit.FixedSide;
+            if (Unit.ShapeData == null)
+            {
+                shape.ShifterShapes.Add(Unit);
+            } else
+            { 
+                if(Unit.ShapeData.SrcUnit == null)
+                    Unit.ShapeData.KeepShape = true;
+                if (Unit.ShapeData.KeepShape)
+                {
+                    shape.ShifterShapes.Add(Unit);
+                }   
+            }
+
+            shape.StatusEffects = Unit.StatusEffects;
+            shape.RelatedUnits = Unit.RelatedUnits;
+
+            shape.hiddenFixedSide = false;
+            if(shape.Side != shape.FixedSide)
+                shape.hiddenFixedSide = true;
+            State.GameManager.TacticalMode.ReplaceUnitInActor(this, shape);
             Unit = shape;
-            Unit.hiddenFixedSide = false;
 
             UnitSprite.UpdateSprites(this, true);
             AnimationController = new AnimationController();
-            Unit.ReloadTraits();
+            Unit.ShifterShapes.Remove(shape);
             Unit.InitializeTraits();
+            Unit.ReloadTraits();
+            ReloadSpellTraits();
+            Unit.Health = (int)Math.Round(Math.Min(Unit.MaxHealth, Math.Max(Unit.MaxHealth * healthPct, 1)));
+            PredatorComponent?.ReplaceUnit(Unit);
         }, 0.4f);
         
     }
+
 }

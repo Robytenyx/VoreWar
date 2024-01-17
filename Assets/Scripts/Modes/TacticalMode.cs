@@ -441,7 +441,7 @@ public class TacticalMode : SceneBase
             units.Add(unit);
             unit.Unit.Side = armies[0].Side;
 			unit.InSight = true; // All units visible by default, for daytime
-            unit.Unit.CurrentLeader = AttackerLeader;
+            unit.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = AttackerLeader;
             attackers.Add(unit);
         }
         if (armies[1] != null)
@@ -453,7 +453,7 @@ public class TacticalMode : SceneBase
                 units.Add(unit);
                 unit.Unit.Side = defenderSide;
 				unit.InSight = true; //All units visible by default, for daytime
-                unit.Unit.CurrentLeader = DefenderLeader;
+                unit.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = DefenderLeader;
                 defenders.Add(unit);
             }
         }
@@ -465,7 +465,7 @@ public class TacticalMode : SceneBase
                 units.Add(unit);
                 unit.Unit.Side = defenderSide;
 				unit.InSight = true; //All units visible by default, for daytime
-                unit.Unit.CurrentLeader = DefenderLeader;
+                unit.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = DefenderLeader;
                 garrison.Add(unit);
             }
         }
@@ -690,7 +690,7 @@ public class TacticalMode : SceneBase
                 Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.upperMiddle, newUnit.GetBestRanged() == null), newUnit);
                 units.Add(unit);
                 summonedUnits++;
-                unit.Unit.CurrentLeader = AttackerLeader;
+                unit.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = AttackerLeader;
             }
         }
 
@@ -709,7 +709,7 @@ public class TacticalMode : SceneBase
                 Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.lowerMiddle, newUnit.GetBestRanged() == null), newUnit);
                 units.Add(unit);
                 summonedUnits++;
-                unit.Unit.CurrentLeader = DefenderLeader;
+                unit.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = DefenderLeader;
             }
         }
 
@@ -768,7 +768,7 @@ public class TacticalMode : SceneBase
                 Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.upperMiddle, newUnit.GetBestRanged() == null), newUnit);
                 units.Add(unit);
                 summonedUnits++;
-                unit.Unit.CurrentLeader = AttackerLeader;
+                unit.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = AttackerLeader;
             }
         }
 
@@ -791,7 +791,7 @@ public class TacticalMode : SceneBase
                 Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.lowerMiddle, newUnit.GetBestRanged() == null), newUnit);
                 units.Add(unit);
                 summonedUnits++;
-                unit.Unit.CurrentLeader = DefenderLeader;
+                unit.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = DefenderLeader;
             }
         }
 
@@ -921,9 +921,9 @@ Turns: {currentTurn}
         foreach (Actor_Unit actor in units)
         {
             if (actor.Unit.Side == defenderSide)
-                actor.Unit.CurrentLeader = DefenderLeader;
+                actor.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = DefenderLeader;
             else
-                actor.Unit.CurrentLeader = AttackerLeader;
+                actor.Unit.RelatedUnits[SingleUnitContext.CurrentLeader] = AttackerLeader;
         }
         foreach (Actor_Unit unit in units)
         {
@@ -1525,7 +1525,7 @@ Turns: {currentTurn}
 
     }
 
-    internal Actor_Unit AddUnitToBattle(Unit unit,  Actor_Unit reciepient)
+    internal Actor_Unit AddUnitToBattle(Unit unit, Actor_Unit reciepient)
     {
         Actor_Unit actor = new Actor_Unit(unit, reciepient);
         units.Add(actor);
@@ -1542,6 +1542,26 @@ Turns: {currentTurn}
         else if (actor.Unit.Side == attackerSide)
             AttackerConvert(actor);
         return actor;
+    }
+
+    internal void ReplaceUnitInActor(Actor_Unit targetActor, Unit unit)
+    {
+        if (village?.GetRecruitables().Remove(targetActor.Unit) ?? false)
+        {
+            village?.GetRecruitables().Add(unit);
+        }
+        else if (armies[0].Units.Remove(targetActor.Unit))
+        {
+            armies[0].Units.Add(unit);
+        }
+        else if (armies[1]?.Units.Remove(targetActor.Unit) ?? false)
+        {
+            armies[1].Units.Add(unit);
+        }
+        if (targetActor.SelfPrey?.Predator != null)
+        {
+            targetActor.SelfPrey.Unit = unit;
+        }
     }
 
     internal Actor_Unit AddUnitToBattle(Unit unit, Vec2i position)
@@ -3789,7 +3809,7 @@ Turns: {currentTurn}
                 actor.Unit.GiveExp(4);
                 if (actor.Unit.TraitBoosts.HealthRegen > 0 && actor.Unit.IsDead == false)
                     actor.Unit.HealPercentage(1);
-                actor.Unit.StatusEffects.Clear();
+                actor.Unit.ClearStatus();
             }
             BattleReviewText.SetActive(false);
             foreach (Actor_Unit actor in units.ToList())
@@ -3831,14 +3851,15 @@ Turns: {currentTurn}
                 {
                     if (State.World.MainEmpires != null)
                     {
-                        Race race = actor.Unit.KilledBy.Race;
+                        Unit killedBy = actor.Unit.RelatedUnits[SingleUnitContext.KilledBy];
+                        Race race = killedBy.Race;
                         if (State.World.Reincarnators == null)
                             State.World.Reincarnators = new List<Reincarnator>();
                         if (!State.World.Reincarnators.Any(rc => rc.PastLife == actor.Unit))
                         {
                             actor.Unit.RemoveTrait(Traits.Transmigration);
                             State.World.Reincarnators.Add(new Reincarnator(actor.Unit, race, true));
-                            State.World.GetEmpireOfSide(actor.Unit.Side)?.Reports.Add(new StrategicReport($"{actor.Unit.Name} will reincarnate as a {InfoPanel.RaceSingular(actor.Unit.KilledBy)}.", new Vec2(0, 0)));
+                            State.World.GetEmpireOfSide(actor.Unit.Side)?.Reports.Add(new StrategicReport($"{actor.Unit.Name} will reincarnate as a {InfoPanel.RaceSingular(killedBy)}.", new Vec2(0, 0)));
 
                         }
                     }

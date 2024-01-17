@@ -560,10 +560,10 @@ public class HoveringTooltip : MonoBehaviour
                 return "Upon being absorbed, this unit bestows all traits that are listed below \"Donor\" in its trait list.";
             case Traits.Extraction:
                 return "Every time digestion progresses, this unit steals one trait from each prey inside them, if only duplicates (or non-assimilable traits) remain, they are turned into exp. Absorbtion steals any that are left. Endoed units instead gain traits.\n(Cheat Trait)";
-            //case Traits.Shapeshifter:
-            //    return "Gives the ability to change into different races after acquiring them via absorbing, being reborn, reincarnating, being endoed or infiltrating. Also Allows Traversal of all terrain at normal speed.";
-            //case Traits.Skinwalker:
-            //    return "Gives the ability to change into specific units after absorbing them or being endoed or infiltrating. Or into the alternate selves acquired by being reborn or reincarnated. Also Allows Traversal of all terrain at normal speed.";
+            case Traits.Shapeshifter:
+                return "Gives the ability to change into different races after acquiring them via absorbing, being reborn, reincarnating, or being endoed. Also Allows Traversal of all terrain at normal speed.";
+            case Traits.Skinwalker:
+                return "Gives the ability to change into specific units after absorbing them or being endoed. Or into the alternate selves acquired by being reborn or reincarnated. Absorbtion & endo won't acquire forms of a race beyond the first to avoid clutter (though unneeded forms can be discarded). Also Allows Traversal of all terrain at normal speed.";
             case Traits.BookEater:
                 return "When this unit would equip a book, it is instead consumed and the spell becomes innate. Does not consume already equipped books, but does consume one if the unit would gain more than it could carry via BookWorm.";
             case Traits.Whispers:
@@ -574,6 +574,8 @@ public class HoveringTooltip : MonoBehaviour
                 return "While Absorbing a prey, Becomes that prey's Race until absorption";
             case Traits.GreaterChangeling:
                 return "While digesing a prey, Becomes that prey's Race until absorption";
+            case Traits.TrueChangeling:
+                return "Changeling that keeps preys form upon absorption";    
             case Traits.SpiritPossession:
                 return "Units soul continues to possess pred after death";
             case Traits.ForcedMetamorphosis:
@@ -596,6 +598,12 @@ public class HoveringTooltip : MonoBehaviour
                 return "Unit's weapon damage also scales with mind. (Half as effectively as weapons main stat)";
             case Traits.ArcaneMagistrate:
                 return "Unit gains 1 focus when it hits a spell, unit gains 4 more if the spell kills the target.";
+            case Traits.Summoner:
+                return "Allows the casting of the Summon spell once per battle.";
+            case Traits.Polymorph:
+                return "Allows the casting of the Polymorph spell once per battle.";
+            case Traits.Annihilation:
+                return "Syphons Levels from prey instead of dealing damage. Upon hitting level 0, the prey dies and cannot be revived.";
         }  
         return "<b>This trait needs a tooltip!</b>";
     }

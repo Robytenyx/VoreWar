@@ -897,7 +897,7 @@ public class PredatorComponent
         }
     }
 
-    void AddPrey(Prey preyUnit, PreyLocation location)
+    internal void AddPrey(Prey preyUnit, PreyLocation location)
     {
         OnSwallowCallbacks(preyUnit);
         switch (location)
@@ -935,7 +935,7 @@ public class PredatorComponent
         UpdateAlivePrey();
     }
     
-    void AddPrey(Prey preyUnit)
+    internal void AddPrey(Prey preyUnit)
     {
         OnSwallowCallbacks(preyUnit);
         prey.Add(preyUnit);
@@ -993,7 +993,7 @@ public class PredatorComponent
         }
     }
 
-    private void RemovePrey(Prey preyUnit)
+    internal void RemovePrey(Prey preyUnit)
     {
         OnRemoveCallbacks(preyUnit);
         womb.Remove(preyUnit);
@@ -1112,8 +1112,10 @@ public class PredatorComponent
                     preyUnit.Unit.hiddenFixedSide = true;
                     preyUnit.Actor.sidesAttackedThisBattle = new List<int>();
                 }
-                //if (preyUnit.Unit.HasTrait(Traits.Shapeshifter) || preyUnit.Unit.HasTrait(Traits.Skinwalker))
-                //    preyUnit.Unit.AcquireShape(unit);
+                if (preyUnit.Unit.HasTrait(Traits.Shapeshifter) || preyUnit.Unit.HasTrait(Traits.Skinwalker))
+                {
+                    preyUnit.Unit.AcquireShape(unit);
+                }
                 preyUnit.Unit.ReloadTraits();
                 preyUnit.Unit.InitializeTraits();
 
@@ -1214,7 +1216,8 @@ public class PredatorComponent
             State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<b>{actor.Unit.Name}</b> has created a {InfoPanel.RaceSingular(spawnUnit)} Spawn <b>{spawnUnit.Name}</b>.");
         Prey preyref = new Prey(spawnActor, actor, spawnActor.PredatorComponent?.prey);
         spawnActor.UnitSprite.UpdateSprites(spawnActor, false);
-        AddPrey(preyref);
+        prey.Add(preyref);
+        
         FreeUnit(preyref.Actor);
         if (!State.GameManager.TacticalMode.turboMode)
             actor.SetBirthMode();
@@ -1233,16 +1236,16 @@ public class PredatorComponent
 
     internal bool CheckChangeRace(Prey preyUnit)
     {
-        if (unit.HiddenRace == unit.Race && template == null)
+        if (unit.RelatedUnits[SingleUnitContext.OriginalForm] == null)
         {
             return true;
         }
-        if (!prey.Contains(template))
+        foreach(Prey currentPrey in prey)
         {
-            template = null;
-            return true;
+            if(unit == currentPrey.GrantsShape)
+                return false;
         }
-        return false;
+        return true;
     }
 
     private Prey SelectPrey(bool isDead, bool random)
@@ -1250,9 +1253,9 @@ public class PredatorComponent
         Prey bestPrey = null;
         List<Prey> preyList;
         if (isDead)
-            preyList = deadPrey;
+            preyList = deadPrey.Where(s => unit.ShifterShapes.Contains(s.GrantsShape)).ToList();
         else
-            preyList = prey;
+            preyList = prey.Where(s => unit.ShifterShapes.Contains(s.GrantsShape)).ToList();
         if (preyList.Count > 0)
         {
             bestPrey = preyList[State.Rand.Next(preyList.Count)];
@@ -1273,7 +1276,7 @@ public class PredatorComponent
         }
         else
         {
-            actor.RevertRace();
+            ShapeUtils.RevertShape(actor);
             return false;
         }
     }
@@ -1282,14 +1285,7 @@ public class PredatorComponent
     {
         if (CheckChangeRace(preyUnit))
         {
-            if (unit.HasTrait(Traits.Changeling) && !preyUnit.Unit.IsDead)
-                return false;
-            actor.ChangeRaceAny(preyUnit.Unit, false, true);
-            template = preyUnit;
-            foreach (Traits trait in preyUnit.Unit.GetTraits)
-            {
-                ShareTrait(trait, preyUnit);
-            }
+            actor.ChangeRaceAny(preyUnit.GrantsShape);
             return true;
         }
         return false;
@@ -1412,6 +1408,40 @@ public class PredatorComponent
                 }
             }
         }
+        if (unit.HasTrait(Traits.Annihilation) && !TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
+        {
+            int prevLevelExp = preyUnit.Unit.GetExperienceRequiredForLevel(preyUnit.Unit.Level - 2);
+            if (preyUnit.Unit.Level == 0)
+                preyDamage = 1;
+            else if (preyUnit.Unit.Level == 1 && preyUnit.Unit.Race != Race.Erin)
+            {
+                preyUnit.Unit.SetLevel(0);
+                preyUnit.Unit.SetStatBaseAll(1);
+                preyUnit.Unit.SetExp(0);
+                preyUnit.Unit.Health = 0;
+                preyUnit.Unit.SavedCopy = null;
+                preyUnit.Unit.SavedVillage = null;
+                preyUnit.Unit.RemoveTrait(Traits.Reincarnation);
+                preyUnit.Unit.RemoveTrait(Traits.InfiniteReincarnation);
+                preyUnit.Unit.RemoveTrait(Traits.Transmigration);
+                preyUnit.Unit.RemoveTrait(Traits.InfiniteTransmigration);
+                preyUnit.Unit.RemoveTrait(Traits.Eternal);
+                preyUnit.Unit.RemoveTrait(Traits.LuckySurvival);
+                preyUnit.Unit.RemoveTrait(Traits.Reformer);
+                preyUnit.Unit.RemoveTrait(Traits.TheGreatEscape);
+                actor.Unit.GiveRawExp(1);
+                actor.Unit.HealPercentage(0.05f);
+            }
+            else
+            {
+                preyUnit.Unit.LevelDown();
+                preyUnit.Unit.SetExp(preyUnit.Unit.Experience - (preyUnit.Unit.Experience - prevLevelExp));
+                preyDamage = 0;
+                actor.Unit.GiveRawExp(Math.Max(1, (int)(preyUnit.Unit.Experience - prevLevelExp)));
+                actor.Unit.HealPercentage(0.05f);
+            }
+
+        }
         if (preyUnit.Unit.IsThisCloseToDeath(preyDamage))
         {
             if (preyUnit.Unit.HasTrait(Traits.Corruption))
@@ -1461,9 +1491,9 @@ public class PredatorComponent
             }
             if (unit.HasTrait(Traits.DigestionRebirth) && State.Rand.Next(2) == 0 && preyUnit.Unit.CanBeConverted() && (Config.SpecialMercsCanConvert || unit.DetermineConversionRace() < Race.Selicia))
             {
-                //HandleShapeshifterRebirth(preyUnit);
+                HandleShapeshifterRebirth(preyUnit);
                 Race conversionRace = unit.DetermineConversionRace();
-                if(unit.HasTrait(Traits.DigestionRebirth) && !unit.HasSharedTrait(Traits.DigestionRebirth))
+                if (unit.HasTrait(Traits.DigestionRebirth) && !unit.HasSharedTrait(Traits.DigestionRebirth))
                     conversionRace = unit.HiddenUnit.DetermineConversionRace();
                 // use source race IF changeling already had this ability before transforming
                 preyUnit.Unit.Health = preyUnit.Unit.MaxHealth / 2;
@@ -1471,7 +1501,7 @@ public class PredatorComponent
                 Race origRace = preyUnit.Unit.Race;
                 preyUnit.ChangeRace(conversionRace);
                 TacticalUtilities.Log.RegisterTraitRebirth(unit, preyUnit.Unit, Location(preyUnit), origRace);
-                    FreeUnit(preyUnit.Actor);
+                FreeUnit(preyUnit.Actor);
                 //State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{preyUnit.Unit.Name} converted from one side to another and changed race thanks to {unit.Name}'s converting digestion rebirth trait.");
                 return 0;
             }
@@ -1489,7 +1519,7 @@ public class PredatorComponent
             if (unit.HasTrait(Traits.TasteForBlood))
                 actor.GiveRandomBoost();
             unit.EnemiesKilledThisBattle++;
-            preyUnit.Unit.KilledBy = unit;
+            preyUnit.Unit.RelatedUnits[SingleUnitContext.KilledBy] = unit;
             preyUnit.Unit.Kill();
             for (int i = 0; i < 20; i++)
             {
@@ -1521,7 +1551,6 @@ public class PredatorComponent
                     return 0;
             }
         }
-            
 
         if (preyUnit.Unit.IsThisCloseToDeath(preyDamage))
         {
@@ -1540,7 +1569,6 @@ public class PredatorComponent
         {
             float speedFactor;
             speedFactor = (float)Math.Sqrt(actor.BodySize() / preyUnit.Actor.BodySize());
-
             speedFactor *= unit.TraitBoosts.Outgoing.AbsorptionRate;
             speedFactor *= preyUnit.Unit.TraitBoosts.Incoming.AbsorptionRate;
 
@@ -1572,7 +1600,7 @@ public class PredatorComponent
             }
 
             //(Ambi) Weight Gain at 80% Absorption
-            if (preyUnit.Unit.IsDeadAndOverkilledBy(preyUnit.Unit.MaxHealth - preyUnit.Unit.MaxHealth/5))
+            if (preyUnit.Unit.IsDeadAndOverkilledBy(preyUnit.Unit.MaxHealth - preyUnit.Unit.MaxHealth / 5))
             {
                 if (Config.WeightGain)
                 {
@@ -1587,12 +1615,7 @@ public class PredatorComponent
                 {
                     actor.Damage(totalHeal * 2);
                     totalHeal = 0;
-                    CreateSpawn(actor.InfectedRace, actor.InfectedSide, unit.Experience/2, true);
-                }
-                foreach (IVoreCallback callback in Callbacks)
-                {
-                    if (!callback.OnFinishAbsorption(preyUnit, actor, location))
-                        return 0;
+                    CreateSpawn(actor.InfectedRace, actor.InfectedSide, unit.Experience / 2, true);
                 }
                 if (preyUnit.Unit.CanBeConverted() &&
                  (Location(preyUnit) == PreyLocation.womb || Config.KuroTenkoConvertsAllTypes) &&
@@ -1601,14 +1624,14 @@ public class PredatorComponent
                  !unit.HasTrait(Traits.PredGusher))
                 {
                     Race conversionRace = unit.DetermineConversionRace();
-                    if(unit.HasTrait(Traits.PredRebirther) && !unit.HasSharedTrait(Traits.PredRebirther))
+                    if (unit.HasTrait(Traits.PredRebirther) && !unit.HasSharedTrait(Traits.PredRebirther))
                         conversionRace = unit.HiddenUnit.DetermineConversionRace();
                     // use source race IF changeling already had this ability before transforming
                     preyUnit.Unit.Health = preyUnit.Unit.MaxHealth / 2;
                     preyUnit.ChangeSide(unit.Side);
                     if (preyUnit.Unit.Race != conversionRace)
                     {
-                        //HandleShapeshifterRebirth(preyUnit);
+                        HandleShapeshifterRebirth(preyUnit);
                         preyUnit.ChangeRace(conversionRace);
                         TacticalUtilities.Log.RegisterBirth(unit, preyUnit.Unit, 1f, "rebirth");
                     }
@@ -1622,18 +1645,37 @@ public class PredatorComponent
                 }
                 else
                 {
-                    TacticalUtilities.Log.RegisterAbsorb(unit, preyUnit.Unit, Location(preyUnit));
+                    TacticalUtilities.Log.RegisterAbsorb(unit, preyUnit.Actor.Unit, Location(preyUnit));
                 }
                 unit.GiveScaledExp(8 * preyUnit.Unit.ExpMultiplier, unit.Level - preyUnit.Unit.Level, true);
-
+                if (Config.AltVoreOralGain && State.Rand.NextDouble() < .4)
+                {
+                    if (unit.HasBreasts)
+                    {
+                        unit.SetDefaultBreastSize(Math.Min(unit.DefaultBreastSize + 1, Races.GetRace(unit).BreastSizes - 1), unit.BreastSize == unit.DefaultBreastSize);
+                        if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideBreasts(unit.Race))
+                            unit.SetDefaultBreastSize(Math.Min(unit.DefaultBreastSize, State.RaceSettings.Get(unit.Race).MaxBoob));
+                    }
+                }
+                if (State.Rand.NextDouble() < .5 && Races.GetRace(unit).WeightGainDisabled == false)
+                {
+                    unit.BodySize = Math.Max(Math.Min(unit.BodySize + 1, Races.GetRace(unit).BodySizes - 1), 0);
+                    if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideWeight(unit.Race))
+                        unit.BodySize = Math.Min(unit.BodySize, State.RaceSettings.Get(unit.Race).MaxWeight);
+                }
+                foreach (IVoreCallback callback in Callbacks)
+                {
+                    if (!callback.OnFinishAbsorption(preyUnit, actor, location))
+                        return 0;
+                }
                 AbsorptionEffect(preyUnit, Location(preyUnit));
                 if (!State.GameManager.TacticalMode.turboMode)
                     actor.SetAbsorbtionMode();
                 CheckPredTraitAbsorption(preyUnit);
-                //if (unit.HasTrait(Traits.Shapeshifter) || unit.HasTrait(Traits.Skinwalker))
-                //{
-                //    unit.AcquireShape(preyUnit.Unit);
-                //}
+                if (unit.HasTrait(Traits.Shapeshifter) || unit.HasTrait(Traits.Skinwalker))
+                {
+                    unit.AcquireShape(preyUnit.Unit);
+                }
 
                 if (preyUnit.SubPrey?.Count() > 0) //Catches any dead prey that weren't already properly moved
                 {
@@ -1646,14 +1688,12 @@ public class PredatorComponent
                     }
                 }
                 RemovePrey(preyUnit);
-
-            }
+            }            
             else if (actor.Infected)
             {
                 actor.Damage(totalHeal, false, false);
                 totalHeal = 0;
             }
-
         }
         else
         {
@@ -1697,13 +1737,13 @@ public class PredatorComponent
 
     private void HandleShapeshifterRebirth(Prey preyUnit)
     {
-        //if (preyUnit.Unit.HasTrait(Traits.Shapeshifter) || preyUnit.Unit.HasTrait(Traits.Skinwalker)) // preserve the unit as it is and rebirth a copy of it instead
-        //{
-        //    Unit clone = preyUnit.Unit.Clone();
-        //    preyUnit.Unit.ShifterShapes.Add(clone);
-        //    clone.ShifterShapes = preyUnit.Unit.ShifterShapes;
-        //    preyUnit.Unit = clone;
-        //}
+        if (preyUnit.Unit.HasTrait(Traits.Shapeshifter) || preyUnit.Unit.HasTrait(Traits.Skinwalker)) // preserve the unit as it is and rebirth a copy of it instead
+        {
+            Unit clone = preyUnit.Unit.Clone();
+            clone.ShifterShapes = preyUnit.Unit.ShifterShapes;
+            clone.ShifterShapes.Add(preyUnit.Unit);
+            preyUnit.Unit = clone;
+        }
     }
 
     //public List<Actor_Unit> Birth()
@@ -2542,7 +2582,7 @@ public class PredatorComponent
                     StatusEffect charm = target.Unit.GetStatusEffect(StatusEffectType.Charmed);
                     if (charm != null)
                     {
-                        target.Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
+                        target.Unit.RemoveStatus(charm);                // betrayal dispels charm
                     }
                 }
                 if (!State.GameManager.TacticalMode.turboMode)
@@ -2640,7 +2680,7 @@ public class PredatorComponent
             StatusEffect charm = target.Unit.GetStatusEffect(StatusEffectType.Charmed);
             if (charm != null)
             {
-                target.Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
+                target.Unit.RemoveStatus(charm);                // betrayal dispels charm
             }
         }
         switch (preyLocation)
@@ -3640,6 +3680,10 @@ public class PredatorComponent
         AddPrey(preyref);
         actor.SetPredMode(preyLocation);
         actor.SetVoreSuccessMode();
+        UpdateFullness();
+    }
+    internal void ReplaceUnit(Unit shape){
+        unit = shape;
         UpdateFullness();
     }
 }

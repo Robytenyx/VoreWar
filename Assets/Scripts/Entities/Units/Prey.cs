@@ -34,6 +34,8 @@ class Prey
     [OdinSerialize]
     public List<Traits> SharedTraits;
 
+    [OdinSerialize]
+    public Unit GrantsShape { get; set; }
     public bool HasGivenWeightToPred = false;
 
     public PreyLocation Location => Predator?.PredatorComponent.Location(this) ?? PreyLocation.stomach;

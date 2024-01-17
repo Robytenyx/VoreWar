@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -18,6 +20,7 @@ public class UnitInfoPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public Slider ManaBar;
     internal Unit Unit;
     internal Actor_Unit Actor;
+    static HirePanel UnitPickerUI;
 
     private int nameInstances;
 
@@ -89,6 +92,12 @@ public class UnitInfoPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             State.GameManager.HoveringTooltip.UpdateInformation(words, Unit, Actor);
             if (Input.GetMouseButtonDown(0))
             {
+                if (words[2] == "AssumeShape")
+                {
+                    if (Actor == null)
+                        ShapeshifterPanel(Unit);
+                    return;
+                }
                 if (words[2] == "UnitEditor")
                 {
                     if (Actor == null)
@@ -145,6 +154,113 @@ public class UnitInfoPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                     HoveringName = "RAREASFARARA";
             }
         }
+    }
+
+    internal static void RenderShape(Unit selectedUnit, Unit shape)
+    {
+        GameObject obj = GameObject.Instantiate(UnitPickerUI.ShapesPanel, UnitPickerUI.ActorFolder);
+        UIUnitSprite sprite = obj.GetComponentInChildren<UIUnitSprite>();
+        Actor_Unit actor = new Actor_Unit(new Vec2i(0, 0), shape);
+        //Text text = obj.transform.GetChild(3).GetComponent<Text>();
+        Text GenderText = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
+        Text EXPText = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+        GameObject EquipRow = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(2).gameObject;
+        GameObject StatRow1 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(3).gameObject;
+        GameObject StatRow2 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(4).gameObject;
+        GameObject StatRow3 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(5).gameObject;
+        GameObject StatRow4 = obj.transform.GetChild(2).GetChild(0).GetChild(0).GetChild(6).gameObject;
+        Text TraitList = obj.transform.GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
+
+        string gender;
+        if (actor.Unit.GetGender() != Gender.None)
+        {
+            if (actor.Unit.GetGender() == Gender.Hermaphrodite)
+                gender = "Herm";
+            else
+                gender = actor.Unit.GetGender().ToString();
+            GenderText.text = $"{gender}";
+        }
+        EXPText.text = $"Level {shape.Level} ({(int)shape.Experience} EXP)";
+        if (actor.Unit.HasTrait(Traits.Resourceful))
+        {
+            EquipRow.transform.GetChild(2).gameObject.SetActive(true);
+            EquipRow.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = shape.GetItem(0)?.Name;
+            EquipRow.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = shape.GetItem(1)?.Name;
+            EquipRow.transform.GetChild(2).GetChild(0).GetComponent<Text>().text = shape.GetItem(2)?.Name;
+        }
+        else
+        {
+            EquipRow.transform.GetChild(2).gameObject.SetActive(false);
+            EquipRow.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = shape.GetItem(0)?.Name;
+            EquipRow.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = shape.GetItem(1)?.Name;
+        }
+        StatRow1.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Strength).ToString();
+        StatRow1.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Dexterity).ToString();
+        StatRow2.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Mind).ToString();
+        StatRow2.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Will).ToString();
+        StatRow3.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Endurance).ToString();
+        StatRow3.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Agility).ToString();
+        if (actor.PredatorComponent != null)
+        {
+            StatRow4.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Voracity).ToString();
+            StatRow4.transform.GetChild(1).GetChild(1).GetComponent<Text>().text = shape.GetStatBase(Stat.Stomach).ToString();
+        }
+        else
+            StatRow4.SetActive(false);
+        TraitList.text = RaceEditorPanel.TraitListToText(shape.GetTraits, true).Replace(", ", "\n");
+        //text.text += $"STR: {unit.GetStatBase(Stat.Strength)} DEX: { unit.GetStatBase(Stat.Dexterity)}\n" +
+        //    $"MND: {unit.GetStatBase(Stat.Mind)} WLL: { unit.GetStatBase(Stat.Will)} \n" +
+        //    $"END: {unit.GetStatBase(Stat.Endurance)} AGI: {unit.GetStatBase(Stat.Agility)}\n";
+        //if (actor.PredatorComponent != null)
+        //    text.text += $"VOR: {unit.GetStatBase(Stat.Voracity)} STM: { unit.GetStatBase(Stat.Stomach)}";
+        actor.UpdateBestWeapons();
+        sprite.UpdateSprites(actor);
+        sprite.Name.text = shape.Name;
+        Button[] buttons = obj.GetComponentsInChildren<Button>();
+        buttons[0].GetComponentInChildren<Text>().text = "Transform";
+        buttons[0].onClick.AddListener(() => Shapeshift(selectedUnit, shape));
+        buttons[0].onClick.AddListener(() => obj.SetActive(false));
+        buttons[1].GetComponentInChildren<Text>().text = "Discard";
+        buttons[1].onClick.AddListener(() => ShapeUtils.RemoveShape(selectedUnit,shape));
+        buttons[1].onClick.AddListener(() => obj.SetActive(false));
+    }
+
+    internal static void Shapeshift(Unit selectedUnit, Unit shape)
+    {
+
+        selectedUnit.ShifterShapes.Remove(shape);
+        
+        shape.ShifterShapes = selectedUnit.ShifterShapes;
+        if(!shape.ShifterShapes.Contains(selectedUnit)) 
+            shape.ShifterShapes.Add(selectedUnit);
+        shape.Side = selectedUnit.Side;
+        shape.Health = shape.MaxHealth;
+
+        RenderShape(shape,selectedUnit);
+        State.GameManager.Recruit_Mode.army.Units.Add(shape);
+        State.GameManager.Recruit_Mode.army.Units.Remove(selectedUnit);
+        State.GameManager.Recruit_Mode.UpdateActorList();
+        //State.GameManager.Recruit_Mode.ButtonCallback(10);
+    }
+
+    internal static void ShapeshifterPanel(Unit selectedUnit)
+    {
+        selectedUnit.UpdateShapeExpAndItems(false);
+        ShapeUtils.UpdateShapeTree(selectedUnit);
+        if (UnitPickerUI == null)
+            UnitPickerUI = State.GameManager.Recruit_Mode.HireUI;
+        int children = UnitPickerUI.ActorFolder.transform.childCount;
+        for (int i = children - 1; i >= 0; i--)
+        {
+            UnityEngine.Object.Destroy(UnitPickerUI.ActorFolder.transform.GetChild(i).gameObject);
+        }
+        foreach (Unit shape in selectedUnit.ShifterShapes)
+        {
+            RenderShape(selectedUnit,shape);
+        }
+        UnitPickerUI.ActorFolder.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 300 * (1 + (children) / 3));
+        UnitPickerUI.GetComponentsInChildren<Button>().Last().GetComponentInChildren<Text>().text = "Cancel";
+        UnitPickerUI.gameObject.SetActive(true);
     }
 
     void DisplayInfoFor(string name)

@@ -3,6 +3,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class RecruitCheatsPanel : MonoBehaviour
 {
@@ -82,13 +83,49 @@ public class RecruitCheatsPanel : MonoBehaviour
 
     void AddTrait()
     {
+        foreach (var unit in Army.Units)
+        {
+            if (State.RandomizeLists.Any(rl => rl.name == TraitPicker.captionText.text))
+            {
+                RandomizeList randomizeList = State.RandomizeLists.Single(rl => rl.name == TraitPicker.captionText.text);
+                if (randomizeList.level > unit.Level)
+                {
+                    unit.AddPermanentTrait((Traits)randomizeList.id);
+                } else
+                {
+                    List<Traits> resTraitsNp;
+                    var resTraits = unit.RandomizeOne(randomizeList, out resTraitsNp);
+                    foreach (Traits resTrait in resTraits)
+                    {
+                        unit.AddPermanentTrait(resTrait);
+                        if (resTrait == Traits.Resourceful || resTrait == Traits.BookWormI || resTrait == Traits.BookWormII || resTrait == Traits.BookWormIII)
+                        {
+                            unit.SetMaxItems();
+                        }
+                    
+                    }
+                    foreach (Traits resTraitNp in resTraitsNp)
+                    {
+                        unit.AddFormBoundTrait(resTraitNp);
+                        if (resTraitNp == Traits.Resourceful || resTraitNp == Traits.BookWormI || resTraitNp == Traits.BookWormII || resTraitNp == Traits.BookWormIII)
+                        {
+                            unit.SetMaxItems();
+                        }
+
+                    }
+                }
+        }
         if (Enum.TryParse(TraitPicker.captionText.text, out Traits trait))
         {
-            foreach (var unit in Army.Units)
+            unit.AddPermanentTrait(trait);
+            if (trait == Traits.Resourceful || trait == Traits.BookWormI || trait == Traits.BookWormII || trait == Traits.BookWormIII)
             {
-                unit.AddPermanentTrait(trait);
+                unit.SetMaxItems();
             }
+
         }
+            }
+
     }
 
     void RemoveTrait()
@@ -97,7 +134,12 @@ public class RecruitCheatsPanel : MonoBehaviour
         {
             foreach (var unit in Army.Units)
             {
-                unit.RemoveTrait(trait);
+            unit.RemoveTrait(trait);
+            if (trait == Traits.Resourceful)
+            {
+                unit.SetMaxItems();
+            }
+
             }
         }
     }
