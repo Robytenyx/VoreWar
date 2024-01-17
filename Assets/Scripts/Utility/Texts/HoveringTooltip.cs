@@ -48,6 +48,18 @@ public class HoveringTooltip : MonoBehaviour
         InfoUpdate(description);
     }
 
+    public void UpdateInformation(string link, Unit unit, Actor_Unit actor)
+    {
+        if (link.StartsWith("Race."))
+        {
+            if (Enum.TryParse(link.Substring(5, link.Length - 5), out Race race))
+            {
+                string description = GetRaceDescription(race, unit, actor);
+                InfoUpdate(description);
+            }
+        }
+    }
+
     public void UpdateInformation(Slider slider)
     {
         //rect.sizeDelta = new Vector2(350, 80);
@@ -184,8 +196,6 @@ public class HoveringTooltip : MonoBehaviour
             }
         }
 
-
-
         if (Enum.TryParse(words[2], out StatusEffectType effectType))
         {
             var effect = unit.GetLongestStatusEffect(effectType);
@@ -241,7 +251,6 @@ public class HoveringTooltip : MonoBehaviour
             }
         }
 
-
         if (State.World?.ItemRepository != null)
         {
             List<Item> AllItems = State.World.ItemRepository.GetAllItems();
@@ -278,9 +287,6 @@ public class HoveringTooltip : MonoBehaviour
             }
         }
 
-
-
-
         switch (words[2])
         {
             case "surrendered":
@@ -313,8 +319,6 @@ public class HoveringTooltip : MonoBehaviour
                 return "";
         }
 
-
-
         string StatData(Stat Stat)
         {
 
@@ -330,8 +334,17 @@ public class HoveringTooltip : MonoBehaviour
             else if (effectBonus < 0) effects = $"{effectBonus} from effects\n";
             return $"{unit.GetStatBase(Stat)} base {Stat}\n{leader}{traits}{effects}Final Stat: {unit.GetStat(Stat)}";
         }
+    }
 
-
+    string GetRaceDescription(Race race, Unit unit, Actor_Unit actor = null)
+    {
+        if (unit == null) //Protector for the add a race screen
+            return "";
+        var racePar = RaceParameters.GetTraitData(unit);
+        var bodySize = State.RaceSettings.GetBodySize(race);
+        var stomachSize = State.RaceSettings.GetStomachSize(race);
+        //return $"{race}\n{racePar.RaceDescription}\nBody Size: {State.RaceSettings.GetBodySize(race)}\nBase Stomach Size: {State.RaceSettings.GetStomachSize(race)}\nFavored Stat: {racePar.FavoredStat}\nDefault Traits:\n{State.RaceSettings.ListTraits(race)}";
+        return $"{race}\n{racePar.RaceDescription}\nRace Body Size: {bodySize}\nCurrent Bulk: {actor?.Bulk()}\nBase Stomach Size: {stomachSize}\nFavored Stat: {State.RaceSettings.GetFavoredStat(race)}";
     }
 
     public static string GetTraitData(Traits trait)

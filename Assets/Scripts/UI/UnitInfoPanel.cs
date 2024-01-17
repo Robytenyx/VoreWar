@@ -63,15 +63,17 @@ public class UnitInfoPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
         }
 
-
-
-        int wordIndex = TMP_TextUtilities.FindIntersectingWord(HoverBox, Input.mousePosition, null);
         //if (wordIndex <= -1 && BasicInfo)
         //{
         //    wordIndex = TMP_TextUtilities.FindIntersectingWord(BasicInfo, Input.mousePosition, null);
         //    HoverBox = BasicInfo;
         //}
-        if (wordIndex > -1)
+
+        int linkIndex = TMP_TextUtilities.FindIntersectingLink(HoverBox, Input.mousePosition, null);
+        int wordIndex = TMP_TextUtilities.FindIntersectingWord(HoverBox, Input.mousePosition, null);
+        if (linkIndex > -1)
+            State.GameManager.HoveringTooltip.UpdateInformation(HoverBox.textInfo.linkInfo[linkIndex].GetLinkID(), Unit, Actor);
+        else if (wordIndex > -1)
         {
             string[] words = new string[5];
             for (int i = 0; i < 5; i++)

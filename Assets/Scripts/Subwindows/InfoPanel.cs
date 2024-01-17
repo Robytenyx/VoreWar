@@ -509,7 +509,7 @@ public class InfoPanel
             sb.AppendLine(unit.Name);
 
         // Add Level and Race
-        sb.AppendLine($"Level {unit.Level} {RaceSingular(unit)}");
+        sb.AppendLine($"Level {unit.Level} <link=\"Race.{unit.Race}\">{RaceSingular(unit)}</link>");
 
         // Add Gender and Type
         if (unit.Race >= Race.Selicia)
