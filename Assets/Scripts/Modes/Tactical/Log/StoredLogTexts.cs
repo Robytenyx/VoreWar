@@ -1827,69 +1827,69 @@ static class StoredLogTexts
 
             // Other Ver. A
             new EventString((i) => $"<b>{i.Unit.Name}</b> approaches <b>{i.Target.Name}</b> and rubs {GPPHis(i.Target)} still squirming {GetRandomStringFrom("lower torso", "pouch", "marsupium")}, feeling <b>{i.Prey.Name}</b> within, and tiring <b>{i.Prey.Name}</b> out a little bit more.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
             // Other Ver. B
             new EventString((i) => $"<b>{i.Target.Name}</b> beckons <b>{i.Unit.Name}</b> over and asks {GPPHim(i.Unit)} to rub {GPPHis(i.Target)} still moving {GetRandomStringFrom("lower torso", "pouch", "marsupium")}. As <b>{i.Unit.Name}</b> rubs, they can feel the whole of <b>{i.Prey.Name}</b>'s body. <b>{i.Prey.Name}</b>, for {GPPHis(i.Prey)} part, breathes a little harder at <b>{i.Unit.Name}</b>'s touch, inadvertently wasting some of {GPPHis(i.Prey)} precious {GetRandomStringFrom("air", "oxygen", "O2")}.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
             // Other Ver. C: What do I even do about spines. Write a lookup for if races are invertebrate?
             //new EventString((i) => $"As <b>{i.Unit.Name}</b> walks past <b>{i.Target.Name}</b>, {GPPHim(i.Unit)} brush{EsIfSingular(i.Unit)} up against {GPPHis(i.Target)} full {GetRandomStringFrom("lower torso", "pouch", "marsupium")}, causing a shiver to go down the {spines/spine analogs<used when <b>{i.Prey.Name}</b> or <b>{i.Unit.Name}</b>(or I guess <b>{i.Target.Name}</b>) belong to races that lack spines>} of all three; <b>{i.Target.Name}</b>, <b>{i.Unit.Name}</b>, and <b>{i.Prey.Name}</b>.",
             //actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
             // Other Ver. D
             new EventString((i) => $"<b>{i.Target.Name}</b> has <b>{i.Unit.Name}</b> rub {GPPHis(i.Target)} still moving {GetRandomStringFrom("lower torso", "pouch", "marsupium")}, robbing <b>{i.Prey.Name}</b> of just a little more air.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
             // Other Ver. E
             new EventString((i) => $"As <b>{i.Unit.Name}</b> walks past <b>{i.Target.Name}</b>, {GPPHe(i.Unit)} brush{EsIfSingular(i.Unit)} up against {GPPHis(i.Target)} full {GetRandomStringFrom("lower torso", "pouch", "marsupium")}, pushing a little more air from <b>{i.Target.Name}</b>'s pouch.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && !PreyDead(s)),
 
             // Self Ver. A
             new EventString((i) => $"As <b>{i.Prey.Name}</b> squirms within <b>{i.Unit.Name}</b>'s pouch, <b>{i.Unit.Name}</b> pushes down on {GPPHis(i.Unit)} pouch, forcing a little bit of <b>{i.Prey.Name}</b>'s limited air supply out with a barely perceptible -hwuh- sound.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
             // Self Ver. B & C: This one's future-proofed, huh? Also, mixed the two.
             new EventString((i) => $"<b>{i.Unit.Name}</b> decides to reach down and knead {GPPHis(i.Unit)} pouch, feeling <b>{i.Prey.Name}</b>'s form trapped inside{(State.Rand.Next(2) == 0 ? "" : " " + GPPHis(i.Unit) + " own")}. As {GPPHe(i.Unit)} do{EsIfSingular(i.Unit)} this, {GPPHe(i.Unit)} lean{SIfSingular(i.Unit)} in and whispers, \"I'd tell you your fate, but frankly, even us {i.Unit.Race} don't fully \'get\' how it works.{(State.Rand.Next(2) == 0 ? "" : " All I know is soon, you\'ll shrink down to nothing, except maybe a little fat.\"")}",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
             // Self Ver. D
             new EventString((i) => $"<b>{i.Unit.Name}</b> decides to reach down and punch {GPPHis(i.Unit)} own pouch, knocking quite a bit of {GetRandomStringFrom("wind", "air")} out of <b>{i.Prey.Name}</b>.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
             // Self Ver. E
             new EventString((i) => $"<b>{i.Unit.Name}</b> kneads {GPPHis(i.Unit)} own pouch, forcing out a little more of <b>{i.Prey.Name}</b>'s{GetRandomStringFrom("", " limited")} air{GetRandomStringFrom("", " supply")}.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && !PreyDead(s)),
 
             // Dead Prey
 
             // Other Ver. A
             new EventString((i) => $"<b>{i.Unit.Name}</b> approaches <b>{i.Target.Name}</b> and rubs {GPPHis(i.Target)} {GetRandomStringFrom("lower torso", "pouch", "marsupium")}. Curiously, the bulge <b>{i.Prey.Name}</b> makes in <b>{i.Target.Name}</b>'s figure seems slightly smaller than before.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
             // Other Ver. B
             new EventString((i) => $"<b>{i.Target.Name}</b> beckons <b>{i.Unit.Name}</b> over and asks {GPPHim(i.Unit)} to rub {GPPHis(i.Target)} still moving {GetRandomStringFrom("lower torso", "pouch", "marsupium")}. Once <b>{i.Unit.Name}</b> is done and walks away, the {GetRandomStringFrom("bump", "lump")} in <b>{i.Target.Name}</b>'s pouch seems slightly... smaller?",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
             // Other Ver. C: Same thing as the other one
             //new EventString((i) => $"As <b>{i.Unit.Name}</b> walks past <b>{i.Target.Name}</b>, {GPPHe(i.Unit)} brush{EsIfSingular(i.Unit)} up against {GPPHis(i.Target)} full {GetRandomStringFrom("lower torso", "pouch", "marsupium")}, causing a shiver to go down <b>{i.Target.Name}</b>'s [spine/spine analog]. Oddly, once <b>{i.Target.Name}</b> is done shaking, the lump <b>{i.Prey.Name}</b> makes in <b>{i.Target.Name}</b>'s figure seems somewhat reduced.",
             //actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
             // Other Ver. D
             new EventString((i) => $"As <b>{i.Unit.Name}</b> rubs <b>{i.Target.Name}</b>'s pouch, the bulge <b>{i.Prey.Name}</b> makes in <b>{i.Target.Name}</b>'s figure curiously seems to grow slightly smaller than it was.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
             // Other Ver. E
             new EventString((i) => $"<b>{i.Target.Name}</b> has <b>{i.Unit.Name}</b> rub {GPPHis(i.Target)} {GetRandomStringFrom("lower torso", "pouch", "marsupium")}, causing the bulge made by <b>{i.Prey.Name}</b> in <b>{i.Target.Name}</b>'s figure to shrink slightly.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
             // Other Ver. F
             new EventString((i) => $"As <b>{i.Unit.Name}</b> walks past <b>{i.Target.Name}</b>, {GPPHe(i.Unit)} brush{EsIfSingular(i.Unit)} up against {GPPHis(i.Target)} {GetRandomStringFrom("lower torso", "pouch", "marsupium")}, causing the bulging pouch to go a little bit down.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target != s.Unit && PreyDead(s)),
             
             // Self Ver. A, B, & D: Combined. (D was also identical to A for some reason?)
             new EventString((i) => $"<b>{i.Unit.Name}</b> decides to reach down and knead {GPPHis(i.Unit)} pouch. {GetRandomStringFrom("Curiously", "Strangely", "Oddly")}, with each rub, the bulge of <b>{i.Prey.Name}</b> seems a {GetRandomStringFrom("touch", "bit")} {GetRandomStringFrom("smaller", "shrunken")}.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
             // Self Ver. C
             new EventString((i) => $"<b>{i.Unit.Name}</b> decides to reach down and punch {GPPHis(i.Unit)} own pouch. For a moment, a dent is left in {GetRandomStringFrom("the shape", "what's left")} of <b>{i.Prey.Name}</b> in <b>{i.Unit.Name}</b>'s pouch, as though <b>{i.Prey.Name}</b> was made of putty.{(State.Rand.Next(2) == 0 ? "" : " Then the dent fills, though if one were observent, they would notice that <b>"+i.Unit.Name+"</b>'s pouch was smaller than before it was punched.")}",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
             // Self Ver. E
             new EventString((i) => $"<b>{i.Unit.Name}</b> decides to reach down and knead {GPPHis(i.Unit)} pouch, which oddly causes the bulge in said pouch to shrink.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
             // Self Ver. F & H: Combined.
             new EventString((i) => $"<b>{i.Unit.Name}</b> decides to reach down and punch {GPPHis(i.Unit)} own pouch, forcing to get just a bit smaller.{(i.Prey.HealthPct > -0.75f ? "" : " Just a little bit more to go.")}",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
             // Self Ver. G
             new EventString((i) => $"<b>{i.Unit.Name}</b> decides to reach down and knead {GPPHis(i.Unit)} pouch.",
-            actorRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
+            targetRace: Race.Kangaroos, priority: 11, conditional: s => s.Target == s.Unit && PreyDead(s)),
             
             //succs
             new EventString((i) =>$"The mere touch of <b>{i.Unit.Name}</b> is enough to make <b>{i.Target.Name}</b> gasp and quiver in pleasure.", actorRace: Race.Succubi, priority: 9, conditional: s=> Friendly(s)),
@@ -2446,14 +2446,14 @@ static class StoredLogTexts
             actorRace: Race.Aabayx, targetRace: Race.Aabayx, priority: 10),
 
             //Kangaroo pred (pouch vore)
-            new EventString((i) => $"With no fanfare or ceremony, <b>{i.Unit.Name}</b>'s pouch stops moving, signaling <b>{i.Target.Name}</b>'s death within.", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"Within <b>{i.Unit.Name}</b>'s pouch, <b>{i.Target.Name}</b> finally stops moving, succumbing to {GPPHis(i.Target)} fate.", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch.", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"What happens to my body now? Surely a pouch can't... digest things.\"", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"Why me? What did I do?\"", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"I wonder who the first person to notice I'm gone will be?\"", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"Where will my {GetRandomStringFrom("clothes","weapon","bones","body")} go?\"", actorRace: Race.Kangaroos, priority: 10),
-            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"When will the battle end?\"", actorRace: Race.Kangaroos, priority: 10),
+            new EventString((i) => $"With no fanfare or ceremony, <b>{i.Unit.Name}</b>'s pouch stops moving, signaling <b>{i.Target.Name}</b>'s death within.", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
+            new EventString((i) => $"Within <b>{i.Unit.Name}</b>'s pouch, <b>{i.Target.Name}</b> finally stops moving, succumbing to {GPPHis(i.Target)} fate.", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
+            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch.", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
+            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"What happens to my body now? Surely a pouch can't... digest things.\"", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
+            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"Why me? What did I do?\"", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
+            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"I wonder who the first person to notice I'm gone will be?\"", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
+            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"Where will my {GetRandomStringFrom("clothes","weapon","bones","body")} go?\"", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
+            new EventString((i) => $"With no new oxygen for far longer than is safe, <b>{i.Target.Name}</b> finally stops moving within <b>{i.Unit.Name}</b>'s pouch. <b>{i.Target.Name}</b>'s last concious thought is a simple question: \"When will the battle end?\"", actorRace: Race.Kangaroos, priority: 10, conditional: InBreasts),
 
             new EventString((i) => $"The violent jiggling in <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> {i.preyLocation.ToSyn()} becomes still, much to <b>{ApostrophizeWithOrWithoutS(i.Unit.Name)}</b> displeasure. \"You can't even survive my {i.preyLocation.ToSyn()}. How weak.\"",
             priority: 9, conditional: s => InBreasts(s) && ActorHumanoid(s)),
