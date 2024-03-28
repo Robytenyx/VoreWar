@@ -4,9 +4,9 @@ public static class PreyLocStrings
 {
     static readonly List<string> mouthSyn = new List<string>() { "mouth", "maw", "gullet", "jaw", "mug", "piehole", "muzzle"};
     static readonly List<string> wombSyn = new List<string>() { "womb", "lower belly", "pussy", "slit", "muff", "cunt" };
-    static readonly List<string> breastSyn = new List<string>() { "breasts", "bosom", "bust", "mammaries", "boobs", "cleavage", "tits" };
-    static readonly List<string> breastSynSing = new List<string>() { "breast", "mammary", "boob", "tit" };
-    static readonly List<string> breastSynPlural = new List<string>() { "breasts", "mammaries", "boobs", "tits" };
+    static readonly List<string> breastSyn = new List<string>() { "breasts", "bosom", "bust", "mammaries", "boobs", "cleavage", "tits", "titties" };
+    static readonly List<string> breastSynSing = new List<string>() { "breast", "bosom", "mammary", "boob", "cleavage", "tit", "titty", "bust", "chest" };
+    static readonly List<string> breastSynPlural = new List<string>() { "breasts", "mammaries", "boobs", "tits", "titties" };
     static readonly List<string> ballsSyn = new List<string>() { "balls", "scrotum", "testicles", "nuts", "orbs", "nutsack" };
     static readonly List<string> ballsSynSing = new List<string>() { "scrotum", "nutsack", "sack", "ballsack" };
     static readonly List<string> ballsSynPlural = new List<string>() { "balls", "testicles", "nuts", "orbs", "testis" };
